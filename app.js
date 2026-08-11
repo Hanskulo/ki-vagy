@@ -440,7 +440,7 @@
   }
   function pushNews(n){ pickIdx(n||4).forEach(newsLine); scroll(); }
 
-  const TICK={hu:"// ELO ADAS",en:"// LIVE FEED",de:"// LIVE-TICKER"};
+  const TICK={hu:"// AKTAK",en:"// FILES",de:"// AKTEN"};
   function buildTicker(){
     const items=newsItems(); const track=$("#ticker-track"); const label=$("#ticker-label");
     if(!track||!items.length) return;
@@ -455,15 +455,15 @@
   }
 
   /* ---- alsó piros hirszalag: valos (Hacker News) + hamis (EBER) keverve ---- */
-  const NB={hu:"HIRHALO",en:"NEWSWIRE",de:"NACHRICHTEN"};
-  let realNews=[];
-  const NEWS_CACHE="eber_news_cache", NEWS_TTL=6*3600*1000, NEWS_MAX=20;
-  // Automata hir-felkutato: a globalisan legnepszerubb (legtobbet szavazott) hireket
-  // huzza le (Hacker News beststories), 6 oranként frissul (localStorage cache), max 20.
+  const NB="HACKER NEWS";
+  let hnRaw=[]; // nyers angol {title,url}
+  const NEWS_CACHE="eber_hn_raw", NEWS_TTL=6*3600*1000, NEWS_MAX=20;
+  // Also sav = Hacker News beststories (globalisan legtobbet szavazott), 6h cache, max 20,
+  // a valasztott nyelvre gepi forditva (angolnal eredeti).
   async function fetchRealNews(){
     try{
       const raw=localStorage.getItem(NEWS_CACHE);
-      if(raw){ const c=JSON.parse(raw); if(c&&c.t&&Array.isArray(c.items)&&c.items.length&&(Date.now()-c.t)<NEWS_TTL){ realNews=c.items.slice(0,NEWS_MAX); buildBottomBar(); return; } }
+      if(raw){ const c=JSON.parse(raw); if(c&&c.t&&Array.isArray(c.items)&&c.items.length&&(Date.now()-c.t)<NEWS_TTL){ hnRaw=c.items.slice(0,NEWS_MAX); buildBottomBar(); return; } }
     }catch(e){}
     try{
       const ctrl=new AbortController(); const to=setTimeout(()=>ctrl.abort(),8000);
@@ -472,19 +472,48 @@
       const items=await Promise.all(ids.map(id=>fetch(`https://hacker-news.firebaseio.com/v0/item/${id}.json`,{signal:ctrl.signal}).then(x=>x.json()).catch(()=>null)));
       clearTimeout(to);
       const fresh=items.filter(it=>it&&it.title).map(it=>({title:it.title, url:it.url||`https://news.ycombinator.com/item?id=${it.id}`}));
-      if(fresh.length){ realNews=fresh; try{ localStorage.setItem(NEWS_CACHE, JSON.stringify({t:Date.now(), items:realNews})); }catch(e){} }
-    }catch(e){ if(!realNews.length) realNews=[]; }
+      if(fresh.length){ hnRaw=fresh; try{ localStorage.setItem(NEWS_CACHE, JSON.stringify({t:Date.now(), items:hnRaw})); }catch(e){} }
+    }catch(e){}
     buildBottomBar();
   }
-  function buildBottomBar(){
+
+  // gepi fordito (MyMemory: ingyenes, CORS, kulcs nelkul), fallback eredeti angol
+  async function translateOne(text,tl){
+    try{
+      const u=`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=en|${tl}`;
+      const r=await fetch(u); if(!r.ok) return text;
+      const j=await r.json(); const tt=j&&j.responseData&&j.responseData.translatedText;
+      if(tt && !/MYMEMORY|INVALID|QUERY LENGTH|LIMIT|USAGE/i.test(tt)) return tt;
+    }catch(e){}
+    return text;
+  }
+  async function translateList(items,tl){
+    const out=[];
+    for(const it of items){ out.push({title:await translateOne(it.title,tl), url:it.url}); }
+    return out;
+  }
+
+  let hnBuilding=false;
+  async function buildBottomBar(){
     const track=$("#nb-track"); const label=$("#nb-label"); if(!track) return;
-    if(label) label.textContent=NB[lang]||"NEWSWIRE";
-    const fakes=newsItems().map((it,i)=>({title:it.h, url:`hir.html?id=${i+1}&lang=${lang}`}));
-    const rn=realNews.slice(); const mix=[]; const mx=Math.max(rn.length,fakes.length);
-    for(let i=0;i<mx;i++){ if(rn[i])mix.push(rn[i]); if(fakes[i])mix.push(fakes[i]); }
-    const list=(mix.length?mix:fakes).slice(0, NEWS_MAX); // max 20 hir egyszerre
+    if(label) label.textContent=NB;
+    if(!hnRaw.length) return;
+    if(lang==="en"){ renderHN(track, hnRaw); return; }
+    const ck="eber_hn_"+lang;
+    try{ const c=JSON.parse(localStorage.getItem(ck)); if(c&&c.t&&Array.isArray(c.items)&&c.items.length&&(Date.now()-c.t)<NEWS_TTL){ renderHN(track, c.items); return; } }catch(e){}
+    // meg nincs forditas: mutasd az angolt, majd forditsd hatterben
+    renderHN(track, hnRaw);
+    if(hnBuilding) return; hnBuilding=true;
+    const reqLang=lang;
+    const translated=await translateList(hnRaw, reqLang);
+    hnBuilding=false;
+    try{ localStorage.setItem("eber_hn_"+reqLang, JSON.stringify({t:Date.now(), items:translated})); }catch(e){}
+    if(reqLang===lang) renderHN($("#nb-track"), translated);
+  }
+  function renderHN(track, items){
+    if(!track) return;
     track.innerHTML="";
-    const fill=()=> list.forEach(m=>{
+    const fill=()=> items.slice(0,NEWS_MAX).forEach(m=>{
       const a=document.createElement("a"); a.className="nb"; a.href=m.url; a.target="_blank"; a.rel="noopener noreferrer"; a.textContent=m.title;
       track.appendChild(a);
     });
@@ -557,14 +586,7 @@
       case "time": if(D){const cp=clockParts(); D.clock=cp.clock; D.part=cp.part;} push(t.time(D||collect()),"scan"); break;
       case "sound": { const m=toggleMute(); push(m?t.sound_off:t.sound_on,"warn"); break; }
       case "news":
-        await type(t.hnews,"hhead"); pushNews(2);
-        if(realNews.length){
-          const r=realNews[Math.floor(Math.random()*realNews.length)];
-          const p=document.createElement("div"); p.className="line hitem";
-          const a=document.createElement("a"); a.className="hlink"; a.href=r.url; a.target="_blank"; a.rel="noopener noreferrer"; a.textContent=r.title;
-          p.appendChild(a); out.appendChild(p);
-        }
-        buildBottomBar(); scroll();
+        await type(t.hnews,"hhead"); pushNews(3); scroll();
         break;
       case "f42": await typeLines(t.f42,"warn",150); break;
       case "sudo": await typeLines(t.sudo,"crit",150); shake(); break;
