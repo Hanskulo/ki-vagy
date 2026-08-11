@@ -181,6 +181,7 @@
     lang:["lang","nyelv","sprache","language"],
     time:["time","ido","idő","zeit","date"],
     sound:["sound","hang","ton","mute","m"],
+    news:["news","hir","hír","hirek","hirek","akta","nachricht"],
     f42:["42"],
     sudo:["sudo","su","root"],
     exit:["exit","quit","q","kilepes","kilépés","beenden","logout"],
@@ -315,7 +316,7 @@
     if(skip||reduced){ push(text,cls); return; }
     const p=document.createElement("div"); p.className="line "+(cls||""); out.appendChild(p);
     const html=render(text); const plain=text.replace(/[{}]/g,"");
-    const delay=1000/(cps||52);
+    const delay=1000/(cps||62);
     for(let i=0;i<plain.length;i++){
       if(skip){ p.innerHTML=html; scroll(); return; }
       p.textContent=plain.slice(0,i+1); scroll();
@@ -342,7 +343,7 @@
     for(let i=0;i<t.boot.length;i++){
       await type(tsPrefix(i)+t.boot[i], i===t.boot.length-1?"warn":"sys");
       if(i===t.boot.length-1){ shake(); noiseHit(0.25,0.14,600); }
-      if(!skip&&!reduced) await sleep(i===t.boot.length-1?560:180);
+      if(!skip&&!reduced) await sleep(i===t.boot.length-1?420:120);
     }
     push("","");
     D=collect();
@@ -361,8 +362,8 @@
       const [main,note]=t[key](d);
       await type("> "+main,"scan");
       if(Math.random()<0.5) noiseHit(0.05,0.05,900);
-      if(!skip&&!reduced) await sleep(80);
-      if(note){ await type("  "+note,"note"); if(!skip&&!reduced) await sleep(140); }
+      if(!skip&&!reduced) await sleep(45);
+      if(note){ await type("  "+note,"note"); if(!skip&&!reduced) await sleep(85); }
     }
 
     push("","");
@@ -371,7 +372,7 @@
       await type(line.t, line.c);
       if(line.c==="scream"){ shake(); spike(); noiseHit(0.18,0.2,500); }
       if(line.boom){ boom(); shake(); spike(); }
-      if(!skip&&!reduced) await sleep(line.c==="scream"?360:200);
+      if(!skip&&!reduced) await sleep(line.c==="scream"?260:140);
     }
     push("","");
     await type(t.hnews,"hhead"); pushNews(); push("","");
@@ -379,14 +380,33 @@
     openPrompt();
   }
 
-  function pushNews(){
-    t.headlines.forEach((h,i)=>{
-      const p=document.createElement("div"); p.className="line hitem";
-      const a=document.createElement("a"); a.className="hlink";
-      a.href=`hir.html?id=${i+1}&lang=${lang}`; a.target="_blank"; a.rel="noopener"; a.textContent=h;
-      p.appendChild(a); out.appendChild(p);
+  function newsItems(){ return (window.EBER_NEWS && window.EBER_NEWS[lang]) ? window.EBER_NEWS[lang].items : []; }
+  function pickIdx(n){
+    const items=newsItems(); const idx=items.map((_,i)=>i);
+    for(let i=idx.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); const tmp=idx[i]; idx[i]=idx[j]; idx[j]=tmp; }
+    return idx.slice(0, Math.min(n, idx.length));
+  }
+  function newsLine(i){
+    const it=newsItems()[i]; if(!it) return;
+    const p=document.createElement("div"); p.className="line hitem";
+    const a=document.createElement("a"); a.className="hlink";
+    a.href=`hir.html?id=${i+1}&lang=${lang}`; a.target="_blank"; a.rel="noopener"; a.textContent=it.h;
+    p.appendChild(a); out.appendChild(p);
+  }
+  function pushNews(n){ pickIdx(n||4).forEach(newsLine); scroll(); }
+
+  const TICK={hu:"// ELO ADAS",en:"// LIVE FEED",de:"// LIVE-TICKER"};
+  function buildTicker(){
+    const items=newsItems(); const track=$("#ticker-track"); const label=$("#ticker-label");
+    if(!track||!items.length) return;
+    if(label) label.textContent=TICK[lang]||"// LIVE";
+    track.innerHTML="";
+    const fill=()=> items.forEach((it,i)=>{
+      const b=document.createElement("button"); b.className="ti"; b.type="button"; b.textContent=it.h;
+      b.addEventListener("click",()=>{ window.open(`hir.html?id=${i+1}&lang=${lang}`,"_blank","noopener"); });
+      track.appendChild(b);
     });
-    scroll();
+    fill(); fill();
   }
 
   let queued=null;
@@ -435,11 +455,12 @@
         break;
       case "who": await typeLines(t.who,"scan",80); break;
       case "lang":
-        if(["hu","en","de"].includes(arg)){ lang=arg; t=L[lang]; bigtitle.textContent=t.title; bigtitle.setAttribute("data-text",t.title); if(D){const cp=clockParts(); D.clock=cp.clock; D.part=cp.part;} push(t.langset(arg),"warn"); ps1.textContent=t.ps1; gateLine.textContent=t.gate; gateBtn.textContent=t.gatebtn; gateSub.textContent=t.gatesub; }
+        if(["hu","en","de"].includes(arg)){ lang=arg; t=L[lang]; bigtitle.textContent=t.title; bigtitle.setAttribute("data-text",t.title); if(D){const cp=clockParts(); D.clock=cp.clock; D.part=cp.part;} push(t.langset(arg),"warn"); ps1.textContent=t.ps1; gateLine.textContent=t.gate; gateBtn.textContent=t.gatebtn; gateSub.textContent=t.gatesub; buildTicker(); }
         else push("lang hu | en | de","note");
         break;
       case "time": if(D){const cp=clockParts(); D.clock=cp.clock; D.part=cp.part;} push(t.time(D||collect()),"scan"); break;
       case "sound": { const m=toggleMute(); push(m?t.sound_off:t.sound_on,"warn"); break; }
+      case "news": await type(t.hnews,"hhead"); pushNews(3); break;
       case "f42": await typeLines(t.f42,"warn",150); break;
       case "sudo": await typeLines(t.sudo,"crit",150); shake(); break;
       case "exit": await typeLines(t.exit,"crit",210); shake(); spike(); break;
@@ -502,6 +523,7 @@
   bigtitle.textContent=t.title; bigtitle.setAttribute("data-text",t.title);
   if(!reduced) bigtitle.classList.add("go");
   gateLine.textContent=t.gate; gateBtn.textContent=t.gatebtn; gateSub.textContent=t.gatesub;
+  buildTicker();
 
   function enter(){
     if(started) return;
