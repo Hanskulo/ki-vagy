@@ -216,6 +216,37 @@ body{
 #rain{position:fixed; inset:0; z-index:40; pointer-events:none; opacity:0; transition:opacity .4s}
 #rain.on{opacity:.55}
 
+/* ---- animalt reszecske-hatter (digitalis por) ---- */
+.dust{ position:fixed; inset:0; z-index:0; pointer-events:none; opacity:.5; }
+
+/* ---- CRT vegigsopro szkennervonal ---- */
+.scanbeam{
+  position:fixed; left:0; right:0; top:0; height:2px; z-index:61; pointer-events:none; opacity:.5;
+  background:linear-gradient(90deg, transparent, rgba(233,230,222,.55) 50%, transparent);
+  box-shadow:0 0 14px rgba(233,230,222,.3), 0 0 3px rgba(255,43,43,.4);
+  animation:sweep 7.5s linear infinite;
+}
+@keyframes sweep{ 0%{ transform:translateY(-6px); opacity:0 } 6%{opacity:.5} 94%{opacity:.5} 100%{ transform:translateY(100vh); opacity:0 } }
+
+/* ---- EBER mini-glitch a navban ---- */
+.glitch-mini{ position:relative; display:inline-block; }
+.glitch-mini::before,.glitch-mini::after{ content:attr(data-text); position:absolute; left:0; top:0; width:100%; overflow:hidden; }
+.glitch-mini::before{ color:var(--red); opacity:0; }
+.glitch-mini::after{ color:var(--cyan); opacity:0; }
+.glitch-mini.gg::before{ animation:mgb 2.6s infinite steps(2) }
+.glitch-mini.gg::after{ animation:mgr 3.3s infinite steps(2) }
+@keyframes mgb{ 0%,90%,100%{opacity:0;transform:translate(0);clip-path:inset(0 0 0 0)} 92%{opacity:.9;transform:translate(-2px,0);clip-path:inset(0 0 55% 0)} 95%{opacity:.7;transform:translate(2px,0);clip-path:inset(60% 0 0 0)} }
+@keyframes mgr{ 0%,88%,100%{opacity:0;transform:translate(0)} 90%{opacity:.8;transform:translate(2px,0);clip-path:inset(30% 0 30% 0)} }
+
+/* ---- hang ikon ---- */
+.soundbtn{
+  font-family:var(--mono); font-size:14px; color:var(--dim); background:transparent;
+  border:1px solid rgba(255,43,43,.32); padding:.2em .55em; cursor:pointer; line-height:1; transition:.15s;
+}
+.soundbtn:hover,.soundbtn:focus{ color:var(--ink); outline:none; }
+.soundbtn.muted{ color:var(--red); opacity:.7; }
+.soundbtn.muted::after{ content:" x"; font-size:.75em; }
+
 /* ---- reduced motion ---- */
 @media (prefers-reduced-motion: reduce){
   .scanlines{animation:none; opacity:.4}
@@ -228,6 +259,8 @@ body{
   .ticker-label::before{animation:none}
   .nb-track{animation:none}
   .nb-label::after{animation:none}
+  .scanbeam{animation:none; opacity:0}
+  .glitch-mini.gg::before,.glitch-mini.gg::after{animation:none}
 }
 
 /* ---- mobil ---- */

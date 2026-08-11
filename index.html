@@ -15,8 +15,10 @@
 </head>
 <body>
 <img src="https://visitor-counter.eltewedtem.workers.dev/px?site=ki-vagy" width="1" height="1" alt="" aria-hidden="true" style="position:absolute;left:-9999px;top:0;opacity:0">
+<canvas id="dust" class="dust" aria-hidden="true"></canvas>
 <div class="scanlines" aria-hidden="true"></div>
 <div class="vignette" aria-hidden="true"></div>
+<div id="scanbeam" class="scanbeam" aria-hidden="true"></div>
 <div id="redpulse" class="redpulse" aria-hidden="true"></div>
 
 <div id="gate" class="gate">
@@ -31,7 +33,7 @@
 
 <main id="screen" class="screen" role="main">
   <nav id="nav" class="nav" aria-label="menu">
-    <span class="brand"><span class="brand-eye">&#9673;</span> <span id="brand-name">EBER</span></span>
+    <span class="brand"><span class="brand-eye">&#9673;</span> <span id="brand-name" class="glitch-mini" data-text="EBER">EBER</span></span>
     <ul class="menu">
       <li><button class="mi" data-action="aktad">AKTAD</button></li>
       <li><button class="mi" data-action="hirek">HIREK</button></li>
@@ -40,6 +42,7 @@
       <li class="langsel">
         <button class="ls" data-lang="hu">HU</button><button class="ls" data-lang="de">DE</button><button class="ls" data-lang="en">EN</button>
       </li>
+      <li><button id="soundbtn" class="soundbtn" type="button" aria-label="hang be es ki" title="hang">&#9835;</button></li>
     </ul>
   </nav>
 
@@ -58,7 +61,7 @@
   <input id="hiddeninput" class="hiddeninput" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" aria-label="parancs bevitele" />
 </main>
 
-<script src="news-data.js?v=7"></script>
+<script src="news-data.js?v=8"></script>
 
 <div id="newsbar" class="newsbar">
   <span class="nb-label" id="nb-label">HIRHALO</span>
@@ -71,6 +74,6 @@
   <span id="st-right">--:--:--</span>
 </footer>
 
-<script src="app.js?v=7"></script>
+<script src="app.js?v=8"></script>
 </body>
 </html>

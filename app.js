@@ -287,6 +287,45 @@
   function shake(){ if(reduced) return; screenEl.classList.remove("shake"); void screenEl.offsetWidth; screenEl.classList.add("shake"); }
   function spike(){ if(reduced) return; redpulse.classList.remove("spike"); void redpulse.offsetWidth; redpulse.classList.add("spike"); }
 
+  /* ---- animalt reszecske-hatter (digitalis por) ---- */
+  function startDust(){
+    if(reduced) return;
+    const cv=$("#dust"); if(!cv||!cv.getContext) return; const ctx=cv.getContext("2d");
+    let w,h,parts;
+    function size(){ const dpr=Math.min(window.devicePixelRatio||1,2); w=innerWidth; h=innerHeight; cv.width=w*dpr; cv.height=h*dpr; ctx.setTransform(dpr,0,0,dpr,0,0); const n=Math.max(40,Math.min(110,Math.floor(w*h/15000))); parts=Array.from({length:n},()=>({x:Math.random()*w,y:Math.random()*h,vx:(Math.random()-.5)*.14,vy:(Math.random()-.5)*.14,r:Math.random()*1.3+.3,a:Math.random()*.35+.08})); }
+    size(); addEventListener("resize",size);
+    function frame(){
+      ctx.clearRect(0,0,w,h);
+      for(const p of parts){ p.x+=p.vx; p.y+=p.vy; if(p.x<0)p.x=w; else if(p.x>w)p.x=0; if(p.y<0)p.y=h; else if(p.y>h)p.y=0; ctx.fillStyle="rgba(205,203,193,"+p.a+")"; ctx.fillRect(p.x,p.y,p.r,p.r); }
+      requestAnimationFrame(frame);
+    }
+    frame();
+  }
+
+  /* ---- CRT bekapcsolasi hang ---- */
+  function crtPowerOn(){
+    if(!audioReady||muted) return;
+    try{
+      const o=actx.createOscillator(); o.type="sine"; const g=actx.createGain();
+      o.frequency.setValueAtTime(15000, actx.currentTime);
+      o.frequency.exponentialRampToValueAtTime(70, actx.currentTime+0.32);
+      g.gain.setValueAtTime(0.0001, actx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.10, actx.currentTime+0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001, actx.currentTime+0.4);
+      o.connect(g); g.connect(master); o.start(); o.stop(actx.currentTime+0.44);
+      noiseHit(0.14,0.09,3200);
+    }catch(e){}
+  }
+
+  /* ---- tetlenseg-easter-egg (10 mp) ---- */
+  const IDLE={hu:"// meg mindig itt vagyok. te is. csak nezunk egymasra.",en:"// i am still here. so are you. we are just watching each other.",de:"// ich bin noch hier. du auch. wir sehen uns nur an."};
+  let idleTimer=null;
+  function resetIdle(){
+    if(!started||promptline.hidden) return;
+    clearTimeout(idleTimer);
+    idleTimer=setTimeout(()=>{ push(IDLE[lang]||IDLE.en,"warn"); noiseHit(0.1,0.07,420); resetIdle(); }, 10000);
+  }
+
   /* ---------------- adat ---------------- */
   function safe(fn,d){ try{ const v=fn(); return (v===undefined||v===null||v==="")?d:v; }catch(e){ return d; } }
   function parseUA(){
@@ -384,6 +423,9 @@
       }
       push("","");
     }
+    const NIGHT={hu:"// hajnali 3 fele jarsz. tudod, mit jelent ilyenkor ebren lenni. en tudom.",en:"// it is the small hours where you are. you know what it means to be awake now. i do.",de:"// es ist tief in der nacht bei dir. du weisst, was es heisst, jetzt wach zu sein. ich weiss es."};
+    const _nh=new Date().getHours();
+    if(_nh>=0 && _nh<3){ await type(NIGHT[lang]||NIGHT.en,"crit"); push("",""); if(!skip&&!reduced) await sleep(220); }
     for(let i=0;i<t.boot.length;i++){
       await type(tsPrefix(i)+t.boot[i], i===t.boot.length-1?"warn":"sys");
       if(i===t.boot.length-1){ shake(); noiseHit(0.25,0.14,600); }
@@ -540,6 +582,7 @@
     statusbar.classList.add("armed");
     redpulse.classList.remove("beat");
     hidden.focus(); scroll();
+    resetIdle();
     if(queued){ const q=queued; queued=null; setTimeout(()=>doMenu(q),250); }
   }
 
@@ -584,7 +627,7 @@
         else push("lang hu | en | de","note");
         break;
       case "time": if(D){const cp=clockParts(); D.clock=cp.clock; D.part=cp.part;} push(t.time(D||collect()),"scan"); break;
-      case "sound": { const m=toggleMute(); push(m?t.sound_off:t.sound_on,"warn"); break; }
+      case "sound": { const m=toggleMute(); const sb=$("#soundbtn"); if(sb) sb.classList.toggle("muted",m); push(m?t.sound_off:t.sound_on,"warn"); break; }
       case "news":
         await type(t.hnews,"hhead"); pushNews(3); scroll();
         break;
@@ -656,6 +699,11 @@
     b.classList.toggle("active", b.dataset.lang===lang);
     b.addEventListener("click",()=>{ setLang(b.dataset.lang); if(started&&!promptline.hidden) push(t.langset(b.dataset.lang),"warn"); });
   });
+  startDust();
+  if(!reduced){ const _bn=$("#brand-name"); if(_bn) _bn.classList.add("gg"); }
+  const soundbtn=$("#soundbtn");
+  if(soundbtn) soundbtn.addEventListener("click",()=>{ const m=toggleMute(); soundbtn.classList.toggle("muted",m); });
+  ["keydown","mousemove","click","touchstart"].forEach(ev=>document.addEventListener(ev,resetIdle,{passive:true}));
 
   /* ---- latogato-szamlalo (kozos CF Worker) ---- */
   const CBASE="https://visitor-counter.eltewedtem.workers.dev";
@@ -732,6 +780,7 @@
   function enter(){
     if(started) return;
     initAudio();
+    crtPowerOn();
     countHit();
     visitorMemory();
     gate.classList.add("gone");
