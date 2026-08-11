@@ -448,12 +448,14 @@
     buildTicker(); buildBottomBar();
     document.querySelectorAll(".ls").forEach(b=>b.classList.toggle("active", b.dataset.lang===lang));
     document.documentElement.lang=lang;
+    if(visCount!=null && started && !promptline.hidden) stMid.textContent=`${OBSERVED[lang]||"OBSERVED"}: ${visCount}`;
   }
 
   let queued=null;
   function openPrompt(){
     skip=false; promptline.hidden=false; ps1.textContent=t.ps1;
-    setStatus("FIGYEL", D?D.tz:""); statusbar.classList.add("armed");
+    setStatus("FIGYEL"); if(visCount!=null) stMid.textContent=`${OBSERVED[lang]||"OBSERVED"}: ${visCount}`;
+    statusbar.classList.add("armed");
     redpulse.classList.remove("beat");
     hidden.focus(); scroll();
     if(queued){ const q=queued; queued=null; setTimeout(()=>doMenu(q),250); }
@@ -579,9 +581,25 @@
     b.addEventListener("click",()=>{ setLang(b.dataset.lang); if(started&&!promptline.hidden) push(t.langset(b.dataset.lang),"warn"); });
   });
 
+  /* ---- latogato-szamlalo (kozos CF Worker) ---- */
+  const CBASE="https://visitor-counter.eltewedtem.workers.dev";
+  const OBSERVED={hu:"MEGFIGYELVE",en:"OBSERVED",de:"BEOBACHTET"};
+  let visCount=null;
+  function refreshCount(){
+    try{ fetch(`${CBASE}/count?site=ki-vagy`).then(r=>r.json()).then(d=>{
+      visCount=(d.human||0)+(d.bot||0);
+      if(started) stMid.textContent=`${OBSERVED[lang]||"OBSERVED"}: ${visCount}`;
+    }).catch(()=>{}); }catch(e){}
+  }
+  function countHit(){
+    try{ fetch(`${CBASE}/hit?site=ki-vagy`,{method:"POST",keepalive:true}).catch(()=>{}); }catch(e){}
+    setTimeout(refreshCount, 900);
+  }
+
   function enter(){
     if(started) return;
     initAudio();
+    countHit();
     gate.classList.add("gone");
     setTimeout(()=>{ gate.style.display="none"; }, 650);
     run();
