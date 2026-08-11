@@ -457,15 +457,23 @@
   /* ---- alsó piros hirszalag: valos (Hacker News) + hamis (EBER) keverve ---- */
   const NB={hu:"HIRHALO",en:"NEWSWIRE",de:"NACHRICHTEN"};
   let realNews=[];
+  const NEWS_CACHE="eber_news_cache", NEWS_TTL=6*3600*1000, NEWS_MAX=20;
+  // Automata hir-felkutato: a globalisan legnepszerubb (legtobbet szavazott) hireket
+  // huzza le (Hacker News beststories), 6 oranként frissul (localStorage cache), max 20.
   async function fetchRealNews(){
     try{
-      const ctrl=new AbortController(); const to=setTimeout(()=>ctrl.abort(),6500);
-      const r=await fetch("https://hacker-news.firebaseio.com/v0/topstories.json",{signal:ctrl.signal});
-      const ids=(await r.json()).slice(0,15);
+      const raw=localStorage.getItem(NEWS_CACHE);
+      if(raw){ const c=JSON.parse(raw); if(c&&c.t&&Array.isArray(c.items)&&c.items.length&&(Date.now()-c.t)<NEWS_TTL){ realNews=c.items.slice(0,NEWS_MAX); buildBottomBar(); return; } }
+    }catch(e){}
+    try{
+      const ctrl=new AbortController(); const to=setTimeout(()=>ctrl.abort(),8000);
+      const r=await fetch("https://hacker-news.firebaseio.com/v0/beststories.json",{signal:ctrl.signal});
+      const ids=(await r.json()).slice(0,NEWS_MAX);
       const items=await Promise.all(ids.map(id=>fetch(`https://hacker-news.firebaseio.com/v0/item/${id}.json`,{signal:ctrl.signal}).then(x=>x.json()).catch(()=>null)));
       clearTimeout(to);
-      realNews=items.filter(it=>it&&it.title).map(it=>({title:it.title, url:it.url||`https://news.ycombinator.com/item?id=${it.id}`}));
-    }catch(e){ realNews=[]; }
+      const fresh=items.filter(it=>it&&it.title).map(it=>({title:it.title, url:it.url||`https://news.ycombinator.com/item?id=${it.id}`}));
+      if(fresh.length){ realNews=fresh; try{ localStorage.setItem(NEWS_CACHE, JSON.stringify({t:Date.now(), items:realNews})); }catch(e){} }
+    }catch(e){ if(!realNews.length) realNews=[]; }
     buildBottomBar();
   }
   function buildBottomBar(){
@@ -474,7 +482,7 @@
     const fakes=newsItems().map((it,i)=>({title:it.h, url:`hir.html?id=${i+1}&lang=${lang}`}));
     const rn=realNews.slice(); const mix=[]; const mx=Math.max(rn.length,fakes.length);
     for(let i=0;i<mx;i++){ if(rn[i])mix.push(rn[i]); if(fakes[i])mix.push(fakes[i]); }
-    const list=mix.length?mix:fakes;
+    const list=(mix.length?mix:fakes).slice(0, NEWS_MAX); // max 20 hir egyszerre
     track.innerHTML="";
     const fill=()=> list.forEach(m=>{
       const a=document.createElement("a"); a.className="nb"; a.href=m.url; a.target="_blank"; a.rel="noopener noreferrer"; a.textContent=m.title;
