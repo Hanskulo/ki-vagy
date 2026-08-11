@@ -4,10 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>ki vagy?</title>
-<meta name="description" content="Egy terminal, ami valos idoben kiolvassa a gepedbol, ki vagy. Engedely nelkul. Nincs szerver, nincs naplo, es megsem tudsz elrejtozni.">
+<meta name="description" content="EBER megfigyelo terminal. Valos idoben kiolvassa a gepedbol, ki vagy. Nincs szerver, nincs naplo, es megsem tudsz elrejtozni.">
 <meta name="color-scheme" content="dark">
 <meta name="theme-color" content="#000000">
-<meta property="og:title" content="ki vagy?">
+<meta property="og:title" content="ki vagy? // EBER">
 <meta property="og:description" content="Valaki figyel a sotetbol. Kiolvas a gepedbol, es megmondja, mit lat. Lepj be, ha mered.">
 <meta property="og:type" content="website">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23000'/%3E%3Ccircle cx='50' cy='50' r='30' fill='none' stroke='%23ff2b2b' stroke-width='7'/%3E%3Ccircle cx='50' cy='50' r='10' fill='%23ff2b2b'/%3E%3C/svg%3E">
@@ -21,6 +21,7 @@
 <div id="gate" class="gate">
   <div class="gate-inner">
     <p class="gate-eye" aria-hidden="true">&#9673;</p>
+    <p class="gate-brand" id="gate-brand">EBER // megfigyelo terminal</p>
     <p class="gate-line" id="gate-line">valaki figyel a sotetbol.</p>
     <button id="gate-btn" class="gate-btn" type="button">[ lepj be ]</button>
     <p class="gate-sub" id="gate-sub">hang ajanlott. egyedul ajanlott.</p>
@@ -28,6 +29,16 @@
 </div>
 
 <main id="screen" class="screen" role="main">
+  <nav id="nav" class="nav" aria-label="menu">
+    <span class="brand"><span class="brand-eye">&#9673;</span> <span id="brand-name">EBER</span></span>
+    <ul class="menu">
+      <li><button class="mi" data-action="aktad">AKTAD</button></li>
+      <li><button class="mi" data-action="hirek">HIREK</button></li>
+      <li><button class="mi" data-action="gep">A GEP</button></li>
+      <li><button class="mi" data-action="ujra">UJRA</button></li>
+    </ul>
+  </nav>
+
   <header class="titlebar" aria-hidden="true">
     <span class="glitch" data-text="KI VAGY?" id="bigtitle">KI VAGY?</span>
   </header>

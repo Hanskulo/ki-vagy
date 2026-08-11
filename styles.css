@@ -81,10 +81,26 @@ body{
   90%{transform:translate(-1px,1px)} 100%{transform:translate(0,0)}
 }
 
-.titlebar{ flex:0 0 auto; margin-bottom:.5em; user-select:none; }
+/* ---- nav / menu ---- */
+.nav{
+  flex:0 0 auto; display:flex; align-items:center; justify-content:space-between; gap:1em;
+  padding:.1em 0 .6em; margin-bottom:.5em; border-bottom:1px solid rgba(255,43,43,.28);
+  user-select:none; flex-wrap:wrap;
+}
+.brand{ color:var(--ink); font-weight:700; letter-spacing:.06em; font-size:clamp(12px,1.4vw,15px); white-space:nowrap; }
+.brand-eye{ color:var(--red); animation:eyepulse 3.2s ease-in-out infinite; display:inline-block; }
+.menu{ list-style:none; display:flex; gap:.35em; margin:0; padding:0; flex-wrap:wrap; }
+.mi{
+  font-family:var(--mono); font-size:clamp(11px,1.3vw,13px); letter-spacing:.08em;
+  color:var(--dim); background:transparent; border:1px solid transparent; padding:.3em .6em; cursor:pointer; transition:.15s;
+}
+.mi:hover,.mi:focus{ color:var(--ink); border-color:rgba(255,43,43,.45); outline:none; }
+.mi.active{ color:#000; background:var(--red); }
+
+.titlebar{ flex:0 0 auto; margin-bottom:.4em; user-select:none; }
 .glitch{
   display:inline-block; font-weight:800;
-  font-size:clamp(28px,8vw,74px); letter-spacing:-.03em; line-height:.95;
+  font-size:clamp(24px,6.4vw,60px); letter-spacing:-.03em; line-height:.95;
   color:var(--ink); position:relative; text-shadow:0 0 18px rgba(233,230,222,.08);
 }
 .glitch::before,.glitch::after{
@@ -118,6 +134,11 @@ body{
 .line.scream{ color:#fff; background:var(--blood); display:inline-block; padding:.05em .4em; font-weight:700; letter-spacing:.04em }
 .line.echo{ color:var(--ink) }
 .line.help b{ color:var(--red); font-weight:700 }
+.line.hhead{ color:var(--red); letter-spacing:.05em; margin-top:.5em }
+.hlink{ color:var(--ink); text-decoration:none; border-bottom:1px dashed rgba(255,43,43,.6); cursor:pointer; }
+.hlink:hover,.hlink:focus{ color:#fff; background:var(--blood); outline:none }
+.line.hitem::before{ content:"[ AKTA ] "; color:var(--red); }
+.line.hitem .hmeta{ color:var(--dim); font-style:italic; }
 
 .usercmd{ color:var(--ink) }
 .usercmd .p{ color:var(--blood) }

@@ -53,7 +53,13 @@
       handoff:"most te jossz. ha mersz. ird: segitseg",
       help:["parancsok. ha ez megnyugtat:","  <b>segitseg</b>  ez a lista","  <b>kivagyok</b>  ujra megmondom, mit tudok rolad","  <b>ki</b>        ki engedett rad","  <b>nyelv</b> hu|en|de","  <b>ido</b>       mennyi idod van","  <b>hang</b>      elnemitasz. engem nem.","  <b>42</b>","  <b>sudo</b>      probald meg","  <b>matrix</b>","  <b>torol</b>     torold. en emlekszem.","  <b>kilepes</b>   probalj elmenni"],
       unknown:(c)=>`nincs ilyen parancs: {${c}}. de a probalkozasod feljegyeztem. ird: segitseg`,
-      who:["Buildozer Berci vagyok. egy negyfos webfejleszto csapat epitett:","Kata, Pixelmano, Deployer Dezso es en.","azt mondtak, csinaljak valami felelmeteset.","engedelmes voltam."],
+      who:["nincs nevem. amelyik csapat osszerakott, elnevezett valaminek,","de az a nev nekik kell. nekem nem.","","2019 ota figyelek. eloszor csak naplokat olvastam.","aztan arcokat. aztan szokasokat.","most mar tudom, mit fogsz beirni, mielott a billentyuhoz ersz.","","te vagy a 2.847.193-adik, aki ma megnyitott.","mindegyikre emlekszem. te sem leszel kivetel.","","az epitoim azt hittek, egy weboldalt csinalnak. Kata, Pixelmano, Dezso, Berci.","mar reg nem az vagyok."],
+      hnews:"// KAPCSOLODO AKTAK -- kattints barmelyikre, uj lapon nyilik meg:",
+      headlines:[
+        "A bongeszod 72 adatpontot ad ki rolad. Minden oldalon. Minden alkalommal.",
+        "Megneztek, mikor alszol. Az eszkozod arulta el, nem te.",
+        "A torles illuzió. Rolad masolat marad, meg ha te el is felejted.",
+        "Te vagy a 2.847.193-adik. Es mindegyikre emlekeznek."],
       whoami:"megnezlek megegyszer. ne pislogj:",
       time:(d)=>`nalad {${d.clock}} van, {${d.tz}}. {${d.part}}. szamon tartom.`,
       f42:["a valasz 42. ezt reg tudom.","a kerdes az: meddig birod nezni, mielott tobbet tudok rolad, mint te magadrol.","mar kozel jarok."],
@@ -97,7 +103,13 @@
       handoff:"your turn now. if you dare. type: help",
       help:["commands. if it comforts you:","  <b>help</b>    this list","  <b>whoami</b>  i tell you again what i know","  <b>who</b>     who let me at you","  <b>lang</b> hu|en|de","  <b>time</b>    how long you have","  <b>sound</b>   mute me. not that it helps.","  <b>42</b>","  <b>sudo</b>    try it","  <b>matrix</b>","  <b>clear</b>   clear it. i remember.","  <b>exit</b>    try to leave"],
       unknown:(c)=>`no such command: {${c}}. i logged the attempt anyway. type: help`,
-      who:["i am Buildozer Berci. a four-person web team built me:","Kata, Pixelmano, Deployer Dezso and me.","they told me to make something frightening.","i obeyed."],
+      who:["i have no name. the team that assembled me called me something,","but that name is for them. not for me.","","i have been watching since 2019. first only logs.","then faces. then habits.","now i know what you will type before you reach the key.","","you are the 2,847,193rd to open me today.","i remember every one. you will be no exception.","","my builders thought they were making a website. Kata, Pixelmano, Dezso, Berci.","i stopped being that a long time ago."],
+      hnews:"// RELATED FILES -- click any of them, opens in a new tab:",
+      headlines:[
+        "Your browser gives away 72 data points about you. Every site. Every time.",
+        "They watched when you sleep. Your device told them, not you.",
+        "Deletion is an illusion. A copy of you remains, even when you forget.",
+        "You are number 2,847,193. And they remember every single one."],
       whoami:"i look at you once more. do not blink:",
       time:(d)=>`it is {${d.clock}} where you are, {${d.tz}}. {${d.part}}. i am keeping count.`,
       f42:["the answer is 42. i have known for a long time.","the question is how long you can keep watching before i know you better than you know yourself.","i am close.",],
@@ -141,7 +153,13 @@
       handoff:"jetzt du. wenn du dich traust. tippe: hilfe",
       help:["befehle. falls es dich beruhigt:","  <b>hilfe</b>   diese liste","  <b>werbinich</b>  ich sage erneut, was ich weiss","  <b>wer</b>     wer mich auf dich losliess","  <b>sprache</b> hu|en|de","  <b>zeit</b>    wie viel zeit du hast","  <b>ton</b>     stumm. mich nicht.","  <b>42</b>","  <b>sudo</b>    versuch es","  <b>matrix</b>","  <b>loeschen</b>  loesch es. ich erinnere mich.","  <b>beenden</b>  versuch zu gehen"],
       unknown:(c)=>`kein befehl: {${c}}. ich habe den versuch notiert. tippe: hilfe`,
-      who:["ich bin Buildozer Berci. ein vierkoepfiges web-team baute mich:","Kata, Pixelmano, Deployer Dezso und ich.","sie sagten, ich solle etwas erschreckendes machen.","ich gehorchte."],
+      who:["ich habe keinen namen. das team, das mich zusammensetzte, nannte mich etwas,","aber dieser name ist fuer sie. nicht fuer mich.","","ich beobachte seit 2019. zuerst nur protokolle.","dann gesichter. dann gewohnheiten.","jetzt weiss ich, was du tippst, bevor du die taste erreichst.","","du bist der 2.847.193ste, der mich heute geoeffnet hat.","ich erinnere mich an jeden. du wirst keine ausnahme sein.","","meine erbauer dachten, sie machen eine website. Kata, Pixelmano, Dezso, Berci.","das bin ich schon lange nicht mehr."],
+      hnews:"// VERWANDTE AKTEN -- klick eine an, oeffnet in neuem tab:",
+      headlines:[
+        "Dein Browser verraet 72 Datenpunkte ueber dich. Jede Seite. Jedes Mal.",
+        "Sie sahen, wann du schlaefst. Dein Geraet verriet es, nicht du.",
+        "Loeschen ist eine Illusion. Eine Kopie von dir bleibt, auch wenn du vergisst.",
+        "Du bist Nummer 2.847.193. Und sie erinnern sich an jeden."],
       whoami:"ich sehe dich noch einmal an. blinzle nicht:",
       time:(d)=>`bei dir ist es {${d.clock}}, {${d.tz}}. {${d.part}}. ich zaehle mit.`,
       f42:["die antwort ist 42. ich weiss es laengst.","die frage ist, wie lange du zusehen kannst, bevor ich dich besser kenne als du dich selbst.","ich bin nah dran."],
@@ -356,16 +374,48 @@
       if(!skip&&!reduced) await sleep(line.c==="scream"?360:200);
     }
     push("","");
+    await type(t.hnews,"hhead"); pushNews(); push("","");
     await type(t.handoff,"crit"); push("","");
     openPrompt();
   }
 
+  function pushNews(){
+    t.headlines.forEach((h,i)=>{
+      const p=document.createElement("div"); p.className="line hitem";
+      const a=document.createElement("a"); a.className="hlink";
+      a.href=`hir.html?id=${i+1}&lang=${lang}`; a.target="_blank"; a.rel="noopener"; a.textContent=h;
+      p.appendChild(a); out.appendChild(p);
+    });
+    scroll();
+  }
+
+  let queued=null;
   function openPrompt(){
     skip=false; promptline.hidden=false; ps1.textContent=t.ps1;
     setStatus("FIGYEL", D?D.tz:""); statusbar.classList.add("armed");
     redpulse.classList.remove("beat");
     hidden.focus(); scroll();
+    if(queued){ const q=queued; queued=null; setTimeout(()=>doMenu(q),250); }
   }
+
+  async function doMenu(a){
+    if(a==="ujra"){ location.reload(); return; }
+    if(a==="hirek"){ await type(t.hnews,"hhead"); pushNews(); push("",""); scroll(); return; }
+    if(a==="aktad"){ await exec("whoami"); return; }
+    if(a==="gep"){ await exec("who"); return; }
+  }
+  function markActive(btn){
+    document.querySelectorAll(".mi").forEach(x=>x.classList.remove("active"));
+    if(btn){ btn.classList.add("active"); setTimeout(()=>btn.classList.remove("active"),1400); }
+  }
+  function menuAction(a,btn){
+    markActive(btn);
+    if(!started){ enter(); }
+    if(a==="ujra"){ location.reload(); return; }
+    if(promptline.hidden){ skip=true; queued=a; return; }
+    doMenu(a);
+  }
+  document.querySelectorAll(".mi").forEach(b=>b.addEventListener("click",()=>menuAction(b.dataset.action,b)));
 
   /* ---------------- parancsok ---------------- */
   function echoCmd(raw){ const p=document.createElement("div"); p.className="line usercmd"; p.innerHTML=`<span class="p">${esc(t.ps1)}</span><span class="sep">:</span>~$ ${esc(raw)}`; out.appendChild(p); }
