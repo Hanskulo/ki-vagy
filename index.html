@@ -36,6 +36,9 @@
       <li><button class="mi" data-action="hirek">HIREK</button></li>
       <li><button class="mi" data-action="gep">A GEP</button></li>
       <li><button class="mi" data-action="ujra">UJRA</button></li>
+      <li class="langsel">
+        <button class="ls" data-lang="hu">HU</button><button class="ls" data-lang="de">DE</button><button class="ls" data-lang="en">EN</button>
+      </li>
     </ul>
   </nav>
 
@@ -55,6 +58,11 @@
 </main>
 
 <script src="news-data.js"></script>
+
+<div id="newsbar" class="newsbar">
+  <span class="nb-label" id="nb-label">HIRHALO</span>
+  <div class="nb-view"><div class="nb-track" id="nb-track"></div></div>
+</div>
 
 <footer id="statusbar" class="statusbar" aria-hidden="true">
   <span id="st-left">-- ALVO --</span>

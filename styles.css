@@ -17,6 +17,7 @@ body{
   margin:0; background:var(--bg); color:var(--ink);
   font-family:var(--mono); font-size:var(--fs); line-height:var(--lh);
   overflow:hidden; -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+  display:flex; flex-direction:column; height:100dvh;
 }
 
 /* ---- CRT overlays ---- */
@@ -67,7 +68,7 @@ body{
 
 /* ---- layout ---- */
 .screen{
-  position:relative; z-index:1; height:100dvh;
+  position:relative; z-index:1; flex:1 1 auto; min-height:0; width:100%;
   display:flex; flex-direction:column;
   padding:clamp(14px,3vw,40px); padding-bottom:0;
   max-width:1100px; margin:0 auto;
@@ -96,6 +97,13 @@ body{
 }
 .mi:hover,.mi:focus{ color:var(--ink); border-color:rgba(255,43,43,.45); outline:none; }
 .mi.active{ color:#000; background:var(--red); }
+
+/* ---- nyelvvalto ---- */
+.langsel{ display:flex; gap:2px; margin-left:.5em; }
+.ls{ font-family:var(--mono); font-size:clamp(10px,1.2vw,12px); color:var(--dim);
+  background:transparent; border:1px solid rgba(255,43,43,.32); padding:.28em .5em; cursor:pointer; transition:.15s; }
+.ls:hover,.ls:focus{ color:var(--ink); outline:none; }
+.ls.active{ background:var(--red); color:#000; border-color:var(--red); font-weight:700; }
 
 /* ---- ticker ---- */
 .ticker{ flex:0 0 auto; display:flex; align-items:center; gap:.8em; overflow:hidden;
@@ -172,17 +180,37 @@ body{
 
 .hiddeninput{ position:absolute; opacity:0; left:-9999px; top:0; width:1px; height:1px; border:0; padding:0; }
 
+/* ---- alsó piros hirszalag ---- */
+.newsbar{
+  flex:0 0 auto; display:flex; align-items:stretch; overflow:hidden;
+  background:var(--red); color:#fff; height:2.3em;
+  font-size:clamp(11px,1.35vw,14px); border-top:2px solid #fff;
+}
+.nb-label{
+  flex:0 0 auto; background:#fff; color:var(--red); font-weight:800; letter-spacing:.12em;
+  padding:0 .9em; display:flex; align-items:center; white-space:nowrap;
+}
+.nb-label::after{ content:" ●"; animation:eyepulse 1.3s ease-in-out infinite; }
+.nb-view{ flex:1 1 auto; overflow:hidden; position:relative; }
+.nb-track{ display:inline-flex; align-items:center; height:100%; white-space:nowrap; will-change:transform; animation:nbrun 68s linear infinite; }
+.nb-track:hover{ animation-play-state:paused; }
+@keyframes nbrun{ from{transform:translateX(0)} to{transform:translateX(-50%)} }
+.nb{ color:#fff; text-decoration:none; padding:0 1.3em; white-space:nowrap; display:inline-flex; align-items:center;
+  border-right:1px solid rgba(255,255,255,.28); cursor:pointer; background:none; border-top:0; border-bottom:0; border-left:0; font:inherit; }
+.nb:hover,.nb:focus{ background:#fff; color:var(--red); outline:none; }
+.nb::before{ content:"▶ "; opacity:.8; margin-right:.4em; }
+
 /* ---- status bar ---- */
 .statusbar{
   position:relative; z-index:1; flex:0 0 auto;
   display:flex; justify-content:space-between; gap:1em;
   font-size:clamp(10px,.8vw + 7px,12px); letter-spacing:.02em;
-  color:#000; background:var(--red); padding:.35em clamp(14px,3vw,40px);
-  max-width:1100px; margin:0 auto; width:100%; user-select:none;
+  color:var(--dim); background:#0d0d0f; padding:.3em clamp(14px,3vw,40px);
+  width:100%; user-select:none; border-top:1px solid rgba(255,255,255,.06);
 }
 .statusbar span{white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
 #st-mid{opacity:.9; text-align:center}
-.statusbar.armed{background:var(--blood); color:#fff}
+.statusbar.armed #st-left{color:var(--red); font-weight:700}
 
 /* ---- matrix rain ---- */
 #rain{position:fixed; inset:0; z-index:40; pointer-events:none; opacity:0; transition:opacity .4s}
@@ -198,6 +226,8 @@ body{
   .screen.shake{animation:none}
   .ticker-track{animation:none}
   .ticker-label::before{animation:none}
+  .nb-track{animation:none}
+  .nb-label::after{animation:none}
 }
 
 /* ---- mobil ---- */

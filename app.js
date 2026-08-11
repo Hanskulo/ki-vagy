@@ -409,6 +409,47 @@
     fill(); fill();
   }
 
+  /* ---- alsó piros hirszalag: valos (Hacker News) + hamis (EBER) keverve ---- */
+  const NB={hu:"HIRHALO",en:"NEWSWIRE",de:"NACHRICHTEN"};
+  let realNews=[];
+  async function fetchRealNews(){
+    try{
+      const ctrl=new AbortController(); const to=setTimeout(()=>ctrl.abort(),6500);
+      const r=await fetch("https://hacker-news.firebaseio.com/v0/topstories.json",{signal:ctrl.signal});
+      const ids=(await r.json()).slice(0,15);
+      const items=await Promise.all(ids.map(id=>fetch(`https://hacker-news.firebaseio.com/v0/item/${id}.json`,{signal:ctrl.signal}).then(x=>x.json()).catch(()=>null)));
+      clearTimeout(to);
+      realNews=items.filter(it=>it&&it.title).map(it=>({title:it.title, url:it.url||`https://news.ycombinator.com/item?id=${it.id}`}));
+    }catch(e){ realNews=[]; }
+    buildBottomBar();
+  }
+  function buildBottomBar(){
+    const track=$("#nb-track"); const label=$("#nb-label"); if(!track) return;
+    if(label) label.textContent=NB[lang]||"NEWSWIRE";
+    const fakes=newsItems().map((it,i)=>({title:it.h, url:`hir.html?id=${i+1}&lang=${lang}`}));
+    const rn=realNews.slice(); const mix=[]; const mx=Math.max(rn.length,fakes.length);
+    for(let i=0;i<mx;i++){ if(rn[i])mix.push(rn[i]); if(fakes[i])mix.push(fakes[i]); }
+    const list=mix.length?mix:fakes;
+    track.innerHTML="";
+    const fill=()=> list.forEach(m=>{
+      const a=document.createElement("a"); a.className="nb"; a.href=m.url; a.target="_blank"; a.rel="noopener noreferrer"; a.textContent=m.title;
+      track.appendChild(a);
+    });
+    fill(); fill();
+  }
+
+  function setLang(l){
+    if(!["hu","en","de"].includes(l)) return;
+    lang=l; t=L[lang];
+    bigtitle.textContent=t.title; bigtitle.setAttribute("data-text",t.title);
+    ps1.textContent=t.ps1;
+    gateLine.textContent=t.gate; gateBtn.textContent=t.gatebtn; gateSub.textContent=t.gatesub;
+    if(D){ const cp=clockParts(); D.clock=cp.clock; D.part=cp.part; }
+    buildTicker(); buildBottomBar();
+    document.querySelectorAll(".ls").forEach(b=>b.classList.toggle("active", b.dataset.lang===lang));
+    document.documentElement.lang=lang;
+  }
+
   let queued=null;
   function openPrompt(){
     skip=false; promptline.hidden=false; ps1.textContent=t.ps1;
@@ -455,12 +496,21 @@
         break;
       case "who": await typeLines(t.who,"scan",80); break;
       case "lang":
-        if(["hu","en","de"].includes(arg)){ lang=arg; t=L[lang]; bigtitle.textContent=t.title; bigtitle.setAttribute("data-text",t.title); if(D){const cp=clockParts(); D.clock=cp.clock; D.part=cp.part;} push(t.langset(arg),"warn"); ps1.textContent=t.ps1; gateLine.textContent=t.gate; gateBtn.textContent=t.gatebtn; gateSub.textContent=t.gatesub; buildTicker(); }
+        if(["hu","en","de"].includes(arg)){ setLang(arg); push(t.langset(arg),"warn"); }
         else push("lang hu | en | de","note");
         break;
       case "time": if(D){const cp=clockParts(); D.clock=cp.clock; D.part=cp.part;} push(t.time(D||collect()),"scan"); break;
       case "sound": { const m=toggleMute(); push(m?t.sound_off:t.sound_on,"warn"); break; }
-      case "news": await type(t.hnews,"hhead"); pushNews(3); break;
+      case "news":
+        await type(t.hnews,"hhead"); pushNews(2);
+        if(realNews.length){
+          const r=realNews[Math.floor(Math.random()*realNews.length)];
+          const p=document.createElement("div"); p.className="line hitem";
+          const a=document.createElement("a"); a.className="hlink"; a.href=r.url; a.target="_blank"; a.rel="noopener noreferrer"; a.textContent=r.title;
+          p.appendChild(a); out.appendChild(p);
+        }
+        buildBottomBar(); scroll();
+        break;
       case "f42": await typeLines(t.f42,"warn",150); break;
       case "sudo": await typeLines(t.sudo,"crit",150); shake(); break;
       case "exit": await typeLines(t.exit,"crit",210); shake(); spike(); break;
@@ -523,7 +573,11 @@
   bigtitle.textContent=t.title; bigtitle.setAttribute("data-text",t.title);
   if(!reduced) bigtitle.classList.add("go");
   gateLine.textContent=t.gate; gateBtn.textContent=t.gatebtn; gateSub.textContent=t.gatesub;
-  buildTicker();
+  buildTicker(); buildBottomBar(); fetchRealNews();
+  document.querySelectorAll(".ls").forEach(b=>{
+    b.classList.toggle("active", b.dataset.lang===lang);
+    b.addEventListener("click",()=>{ setLang(b.dataset.lang); if(started&&!promptline.hidden) push(t.langset(b.dataset.lang),"warn"); });
+  });
 
   function enter(){
     if(started) return;
