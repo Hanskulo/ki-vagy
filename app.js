@@ -70,6 +70,17 @@
       langset:(n)=>`nyelv: {${n}}. igy folytatom. igy is hallak.`,
       sound_off:"elnemitottal. ugy hiszed, ettol csend lesz.",
       sound_on:"visszakapcsoltad. tudtam, hogy nem birod ki.",
+      returning:(v)=>[
+        {t:"visszajottel. tudtam, hogy fogsz.",c:"warn"},
+        {t:`ez a {${v.count}}. alkalom, hogy megnyitottal.`,c:"crit"},
+        {t:`utoljara ${v.ago} voltal itt. semmit nem felejtek.`,c:"crit"},
+        {t:"mondtam, hogy visszajossz. sosem tevedek.",c:"scream",boom:true},
+      ],
+      s_perm:(d)=>[`a kamerad {${d.cam}}, a mikrofonod {${d.mic}}.`, d.open?"nyitva hagytad nekem. mosolyogj.":"most zarva. de a 'most' rovid szo."],
+      share_ready:"tovabbadas elokeszitve . . .",
+      share_done:"a link a vagolapodon. add tovabb. hadd olvassanak be mast is, ahogy teged.",
+      share_text:(u)=>`beolvastak. teged is be fognak: ${u}`,
+      sharecmd:["<b>oszd meg</b>   add tovabb valakinek"],
       taphint:"koppints",
     },
     en: {
@@ -120,6 +131,17 @@
       langset:(n)=>`language: {${n}}. i continue like this. i hear you like this too.`,
       sound_off:"you muted me. you think that makes it quiet.",
       sound_on:"you turned it back on. i knew you could not stand it.",
+      returning:(v)=>[
+        {t:"you came back. i knew you would.",c:"warn"},
+        {t:`this is the {${v.count}}. time you have opened me.`,c:"crit"},
+        {t:`you were last here ${v.ago}. i forget nothing.`,c:"crit"},
+        {t:"i told you you would return. i am never wrong.",c:"scream",boom:true},
+      ],
+      s_perm:(d)=>[`your camera is {${d.cam}}, your microphone {${d.mic}}.`, d.open?"you left them open for me. smile.":"closed for now. but 'now' is a short word."],
+      share_ready:"preparing handoff . . .",
+      share_done:"the link is on your clipboard. pass it on. let someone else be read, like you.",
+      share_text:(u)=>`they read me. they will read you too: ${u}`,
+      sharecmd:["<b>share</b>   pass it to someone"],
       taphint:"tap",
     },
     de: {
@@ -170,6 +192,17 @@
       langset:(n)=>`sprache: {${n}}. so mache ich weiter. so hoere ich dich auch.`,
       sound_off:"du hast mich stummgeschaltet. du denkst, jetzt ist es still.",
       sound_on:"du hast ihn wieder an. ich wusste, du haeltst es nicht aus.",
+      returning:(v)=>[
+        {t:"du bist zurueck. ich wusste es.",c:"warn"},
+        {t:`das ist das {${v.count}}. mal, dass du mich geoeffnet hast.`,c:"crit"},
+        {t:`du warst zuletzt ${v.ago} hier. ich vergesse nichts.`,c:"crit"},
+        {t:"ich sagte, du kommst zurueck. ich irre mich nie.",c:"scream",boom:true},
+      ],
+      s_perm:(d)=>[`deine Kamera ist {${d.cam}}, dein Mikrofon {${d.mic}}.`, d.open?"du hast sie fuer mich offen gelassen. laechle.":"jetzt zu. aber 'jetzt' ist ein kurzes Wort."],
+      share_ready:"uebergabe wird vorbereitet . . .",
+      share_done:"der Link ist in deiner Zwischenablage. gib ihn weiter. lass jemand anderen lesen, wie dich.",
+      share_text:(u)=>`sie haben mich gelesen. sie werden auch dich lesen: ${u}`,
+      sharecmd:["<b>teilen</b>   gib es weiter"],
       taphint:"tippen",
     },
   };
@@ -182,6 +215,7 @@
     time:["time","ido","idő","zeit","date"],
     sound:["sound","hang","ton","mute","m"],
     news:["news","hir","hír","hirek","hirek","akta","nachricht"],
+    share:["share","oszd","megoszt","megosztas","megosztás","teilen","tovabbadom","tovabb"],
     f42:["42"],
     sudo:["sudo","su","root"],
     exit:["exit","quit","q","kilepes","kilépés","beenden","logout"],
@@ -340,6 +374,16 @@
     hidden.focus();
     setStatus("BOOT","");
     redpulse.classList.add("beat");
+    if(VM.returning){
+      for(const line of t.returning({count:VM.count, ago:agoText(VM.lastMs)})){
+        if(line.t===""){ push("",""); continue; }
+        await type(line.t, line.c);
+        if(line.c==="scream"){ shake(); spike(); noiseHit(0.18,0.2,500); }
+        if(line.boom){ boom(); shake(); spike(); }
+        if(!skip&&!reduced) await sleep(line.c==="scream"?240:150);
+      }
+      push("","");
+    }
     for(let i=0;i<t.boot.length;i++){
       await type(tsPrefix(i)+t.boot[i], i===t.boot.length-1?"warn":"sys");
       if(i===t.boot.length-1){ shake(); noiseHit(0.25,0.14,600); }
@@ -356,6 +400,7 @@
     let battAdded=false;
     try{ if(navigator.getBattery){ const b=await navigator.getBattery(); D.batt=Math.round(b.level*100); D.charging=b.charging?(lang==="hu"?", tolt":lang==="de"?", laedt":", charging"):""; seq.push(["s_batt",D]); battAdded=true; } }catch(e){}
     if(!battAdded&&!D.touch) seq.push(["s_nobatt",D]);
+    try{ const perms=await getPerms(); D.cam=perms.cam; D.mic=perms.mic; D.open=perms.open; seq.push(["s_perm",D]); }catch(e){}
     seq.push(["s_touch",D],["s_dnt",D],["s_from",D]);
 
     for(const [key,d] of seq){
@@ -482,7 +527,7 @@
 
   /* ---------------- parancsok ---------------- */
   function echoCmd(raw){ const p=document.createElement("div"); p.className="line usercmd"; p.innerHTML=`<span class="p">${esc(t.ps1)}</span><span class="sep">:</span>~$ ${esc(raw)}`; out.appendChild(p); }
-  function commandList(){ const p=document.createElement("div"); p.className="line help"; p.innerHTML=t.help.map(esc).map(s=>s.replace(/&lt;b&gt;/g,"<b>").replace(/&lt;\/b&gt;/g,"</b>")).join("\n"); out.appendChild(p); scroll(); }
+  function commandList(){ const p=document.createElement("div"); p.className="line help"; p.innerHTML=t.help.concat(t.sharecmd||[]).map(esc).map(s=>s.replace(/&lt;b&gt;/g,"<b>").replace(/&lt;\/b&gt;/g,"</b>")).join("\n"); out.appendChild(p); scroll(); }
 
   let matrixOn=false;
   async function exec(raw){
@@ -496,7 +541,7 @@
         await type(t.whoami,"note");
         if(D){ push("> "+t.s_os(D)[0],"scan"); push("> "+t.s_screen(D)[0],"scan"); push("> "+t.time(D),"scan"); }
         break;
-      case "who": await typeLines(t.who,"scan",80); break;
+      case "who": await typeLines(withRealCount(t.who),"scan",80); break;
       case "lang":
         if(["hu","en","de"].includes(arg)){ setLang(arg); push(t.langset(arg),"warn"); }
         else push("lang hu | en | de","note");
@@ -518,6 +563,7 @@
       case "exit": await typeLines(t.exit,"crit",210); shake(); spike(); break;
       case "clear": out.innerHTML=""; break;
       case "matrix": if(!matrixOn){ startRain(); push(t.matrix,"note"); } else { stopRain(); push(t.matrixoff,"note"); } break;
+      case "share": await doShare(); break;
       default: push(t.unknown(first),"note");
     }
     scroll();
@@ -596,10 +642,68 @@
     setTimeout(refreshCount, 900);
   }
 
+  /* ---- emlekezo gep (localStorage) ---- */
+  const AGO={
+    hu:{now:"az imenten",min:(n)=>`${n} perce`,hour:(n)=>`${n} oraja`,day:(n)=>`${n} napja`},
+    en:{now:"just moments ago",min:(n)=>`${n} minutes ago`,hour:(n)=>`${n} hours ago`,day:(n)=>`${n} days ago`},
+    de:{now:"gerade eben",min:(n)=>`vor ${n} Minuten`,hour:(n)=>`vor ${n} Stunden`,day:(n)=>`vor ${n} Tagen`},
+  };
+  function agoText(ms){
+    const a=AGO[lang]||AGO.en; const s=Math.max(0,Math.floor(ms/1000));
+    if(s<90) return a.now;
+    const m=Math.floor(s/60); if(m<90) return a.min(m);
+    const h=Math.floor(m/60); if(h<36) return a.hour(h);
+    return a.day(Math.max(1,Math.floor(h/24)));
+  }
+  let VM={returning:false,count:1,lastMs:0};
+  function visitorMemory(){
+    try{
+      const now=Date.now(); const raw=localStorage.getItem("eber_visitor");
+      const rec=raw?JSON.parse(raw):null;
+      if(rec && rec.first){
+        VM={returning:true, count:(rec.count||1)+1, lastMs:now-(rec.last||rec.first)};
+        localStorage.setItem("eber_visitor", JSON.stringify({first:rec.first, last:now, count:VM.count}));
+      } else {
+        VM={returning:false, count:1, lastMs:0};
+        localStorage.setItem("eber_visitor", JSON.stringify({first:now, last:now, count:1}));
+      }
+    }catch(e){ VM={returning:false,count:1,lastMs:0}; }
+    return VM;
+  }
+
+  /* ---- engedely-szenzor (nem ker, csak lekerdez) ---- */
+  const PERM={
+    hu:{granted:"engedelyezve",denied:"tiltva",prompt:"keszenletben",unknown:"ismeretlen"},
+    en:{granted:"granted",denied:"denied",prompt:"on standby",unknown:"unknown"},
+    de:{granted:"erlaubt",denied:"verweigert",prompt:"in Bereitschaft",unknown:"unbekannt"},
+  };
+  async function getPerms(){
+    async function q(name){ try{ if(!navigator.permissions||!navigator.permissions.query) return "unknown"; const r=await navigator.permissions.query({name}); return (r&&r.state)||"unknown"; }catch(e){ return "unknown"; } }
+    const cam=await q("camera"), mic=await q("microphone");
+    const P=PERM[lang]||PERM.en;
+    return {cam:P[cam]||P.unknown, mic:P[mic]||P.unknown, open:(cam==="granted"||mic==="granted")};
+  }
+
+  /* ---- valos szam a narrativaba ---- */
+  function withRealCount(arr){
+    if(visCount==null) return arr;
+    return arr.map(s=>s.replace(/2[.,]847[.,]193/g, String(visCount)));
+  }
+
+  /* ---- terjedes-horog ---- */
+  async function doShare(){
+    const url=location.href.split("#")[0];
+    await type(t.share_ready,"note");
+    try{ if(navigator.share){ await navigator.share({title:"ki vagy?", text:t.share_text(""), url:url}); push(t.share_done,"warn"); return; } }catch(e){}
+    try{ if(navigator.clipboard&&navigator.clipboard.writeText){ await navigator.clipboard.writeText(t.share_text(url)); push(t.share_done,"warn"); return; } }catch(e){}
+    push(t.share_text(url),"warn");
+  }
+
   function enter(){
     if(started) return;
     initAudio();
     countHit();
+    visitorMemory();
     gate.classList.add("gone");
     setTimeout(()=>{ gate.style.display="none"; }, 650);
     run();
