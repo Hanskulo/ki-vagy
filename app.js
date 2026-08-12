@@ -467,30 +467,42 @@
     openPrompt();
   }
 
-  function newsItems(){ return (window.EBER_NEWS && window.EBER_NEWS[lang]) ? window.EBER_NEWS[lang].items : []; }
-  function pickIdx(n){
-    const items=newsItems(); const idx=items.map((_,i)=>i);
-    for(let i=idx.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); const tmp=idx[i]; idx[i]=idx[j]; idx[j]=tmp; }
-    return idx.slice(0, Math.min(n, idx.length));
+  function nd(){ return (window.EBER_NEWS && window.EBER_NEWS[lang]) ? window.EBER_NEWS[lang] : null; }
+  // egyesitett akta-lista: mely (items, teljes cikk) + bank (generativ torzs a hir.js-ben)
+  function allActs(){
+    const d=nd(); if(!d) return [];
+    const A=[];
+    (d.items||[]).forEach((it,i)=>A.push({href:`hir.html?id=${i+1}&lang=${lang}`, h:it.h}));
+    (d.bank||[]).forEach((it,i)=>A.push({href:`hir.html?b=${i}&lang=${lang}`, h:it.h}));
+    return A;
   }
-  function newsLine(i){
-    const it=newsItems()[i]; if(!it) return;
+  // determinisztikus PRNG (mulberry32) + 6 oras seed -> a kitalalt aktak 6 orankent MAGUKTOL megujulnak
+  function mulberry32(a){ return function(){ a|=0; a=a+0x6D2B79F5|0; let t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
+  function rotatedActs(){
+    const A=allActs(); if(!A.length) return A;
+    const seed=Math.floor(Date.now()/(6*3600*1000));
+    const rng=mulberry32(seed>>>0);
+    const idx=A.map((_,i)=>i);
+    for(let i=idx.length-1;i>0;i--){ const j=Math.floor(rng()*(i+1)); const t=idx[i]; idx[i]=idx[j]; idx[j]=t; }
+    return idx.map(i=>A[i]);
+  }
+  function actLine(a){
     const p=document.createElement("div"); p.className="line hitem";
-    const a=document.createElement("a"); a.className="hlink";
-    a.href=`hir.html?id=${i+1}&lang=${lang}`; a.target="_blank"; a.rel="noopener"; a.textContent=it.h;
-    p.appendChild(a); out.appendChild(p);
+    const el=document.createElement("a"); el.className="hlink"; el.href=a.href; el.target="_blank"; el.rel="noopener"; el.textContent=a.h;
+    p.appendChild(el); out.appendChild(p);
   }
-  function pushNews(n){ pickIdx(n||4).forEach(newsLine); scroll(); }
+  function pushNews(n){ rotatedActs().slice(0, n||4).forEach(actLine); scroll(); }
 
   const TICK={hu:"// AKTAK",en:"// FILES",de:"// AKTEN"};
   function buildTicker(){
-    const items=newsItems(); const track=$("#ticker-track"); const label=$("#ticker-label");
-    if(!track||!items.length) return;
+    const track=$("#ticker-track"); const label=$("#ticker-label");
+    const acts=rotatedActs(); if(!track||!acts.length) return;
     if(label) label.textContent=TICK[lang]||"// LIVE";
     track.innerHTML="";
-    const fill=()=> items.forEach((it,i)=>{
-      const b=document.createElement("button"); b.className="ti"; b.type="button"; b.textContent=it.h;
-      b.addEventListener("click",()=>{ window.open(`hir.html?id=${i+1}&lang=${lang}`,"_blank","noopener"); });
+    const list=acts.slice(0,14);
+    const fill=()=> list.forEach(a=>{
+      const b=document.createElement("button"); b.className="ti"; b.type="button"; b.textContent=a.h;
+      b.addEventListener("click",()=>{ window.open(a.href,"_blank","noopener"); });
       track.appendChild(b);
     });
     fill(); fill();

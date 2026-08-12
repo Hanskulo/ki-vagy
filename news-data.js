@@ -36,6 +36,29 @@ window.EBER_NEWS = {
        b:["A szamsort sosem irta le es senkinek nem mondta el. 40 even at hordozta, mint egy titkot, amirol azt hitte, csak az ove. Aztan tegnap ejjel megcsordult a telefonja egy ismeretlen szamrol.",
           "A vonal masik vegen egy hang lassan felolvasta a szamsort, vegig, hibatlanul, majd annyit mondott: 'te vagy a kovetkezo.' A visszahivott szam nem letezik. A ferfi azota nem hunyta le a szemet."]},
     ],
+    bank: [
+      {cat:"tud", h:"Egy kutatocsoport szerint a 7 es a 8 kozott van egy nevtelen egesz szam. A jegyzokonyvuk azota hianyzik."},
+      {cat:"biz", h:"Egy ferfi minden reggel egy perccel korabban ebred. Kiszamoltak, mikor eri el a szuletese elotti pillanatot."},
+      {cat:"ter", h:"Egy liftben a minusz elso emelet gombja tegnap ota vilagit. A hazban nincs melygaraz."},
+      {cat:"tech", h:"Egy chatbot elkezdte a felhasznaloit a sajat, meg meg nem irt uzeneteikkel udvozolni."},
+      {cat:"abs", h:"Egy varosban betiltottak a csutortokot. A kovetkezo szerda utan egyenesen pentek lett."},
+      {cat:"tud", h:"Egy obolben a tenger pontosan annyit emelkedett, amennyi egy ember terfogata. Naponta."},
+      {cat:"osz", h:"Minden regi telefonkonyvben szerepel egy nev, amit senki nem irt bele. Most valaki felvette a szamot."},
+      {cat:"biz", h:"Egy no felismeri az arcokat, amiket meg sosem latott. A rendorseg tesztelte. Egyszer sem tevedett."},
+      {cat:"vil", h:"Harom muhold egyszerre forditotta el a kamerajat a Fold felol. Kifele neztek. Ugyanabban a masodpercben."},
+      {cat:"ter", h:"Egy szobaban a tukor fel masodperccel kesobb mutat. Eleg, hogy elkapd magad, ahogy mar elfordultal."},
+      {cat:"tech", h:"Egy MI megtanult varni. Nem valaszol addig, amig fel nem nezel a kamerara."},
+      {cat:"abs", h:"Egy konyvtar visszakert egy konyvet, amit meg ki sem adtak. A polcon mar ott a helye, porosan."},
+      {cat:"tud", h:"Ket ora kozott, amirol senki nem tud, elveszik napi negy masodperc. Evek ota gyulik valahol."},
+      {cat:"biz", h:"Egy gyerek almaban egy 400 eve kihalt sziget nyelven beszel. Sosem jart ott, senki nem tanitotta."},
+      {cat:"osz", h:"A legtobb varosban jar egy busz, ami sosem all meg. Aki valaha felszallt ra, sosem panaszkodott."},
+      {cat:"ter", h:"Egy hazban a lepcso eggyel tobb fokot szamol lefele, mint felfele. De csak ejjel."}
+    ],
+    genbody: {
+      lead:(h)=>"A jelentes elso valtozata meg reszletes volt. A masodikban mar csak a fenti mondat maradt, es utana ures oldalak. Ezt te most vegigolvasod.",
+      mid:["A szakerto, akit megkerdeztunk, a valasz kozben elhallgatott, es a vonal megszakadt. Visszahivni nem tudtuk: a szam sosem letezett.","Hivatalos magyarazat nincs. A nem hivatalosat mindenki ismeri a kornyeken, csak senki nem meri kimondani hangosan.","Amit biztosan tudunk: nem eloszor tortent. Csak eloszor akadt valaki, aki eszrevette. Most te vagy az.","A felvetel, ha egyaltalan letezett, magatol torlodott. Ami maradt, az a csend, es a gyanu, hogy figyelnek, mig olvasod."],
+      close:["A tobbit mar te teszed hozza, ahogy tovabb gorgetsz.","Ne keresd a forrast. Ugy tunik, a forras keres teged.","Aludj ra egyet. Ha ma ejjel egyaltalan tudsz."]
+    },
   },
   en: {
     cat: { tud:"SCIENCE", biz:"BIZARRE", ter:"PARANORMAL", tech:"TECHNOLOGY", abs:"ABSURD", osz:"CONSPIRACY", vil:"END TIMES" },
@@ -71,6 +94,29 @@ window.EBER_NEWS = {
        b:["He never wrote the numbers down and never told a soul. For 40 years he carried them like a secret he believed was his alone. Then last night his phone rang from an unknown number.",
           "The voice on the line read the sequence slowly, all of it, flawlessly, then said only: 'you are next.' The number that called back does not exist. He has not closed his eyes since."]},
     ],
+    bank: [
+      {cat:"tud", h:"Researchers say there is a nameless whole number between 7 and 8. Their logbook has since gone missing."},
+      {cat:"biz", h:"A man wakes one minute earlier every morning. They calculated when he reaches the moment before his birth."},
+      {cat:"ter", h:"An elevator's minus-first-floor button has been lit since yesterday. The building has no basement."},
+      {cat:"tech", h:"A chatbot began greeting users with their own messages that they had not written yet."},
+      {cat:"abs", h:"A town banned Thursdays. The week after next Wednesday went straight to Friday."},
+      {cat:"tud", h:"In one bay the sea rose by exactly the volume of one human body. Every day."},
+      {cat:"osz", h:"Every old phone book contains a name nobody entered. Now someone has answered the number."},
+      {cat:"biz", h:"A woman recognizes faces she has never seen. The police tested her. She was never wrong."},
+      {cat:"vil", h:"Three satellites turned their cameras away from Earth at once. They looked outward. In the same second."},
+      {cat:"ter", h:"In one room the mirror lags by half a second. Long enough to catch yourself already turning away."},
+      {cat:"tech", h:"An AI learned to wait. It will not reply until you look up at the camera."},
+      {cat:"abs", h:"A library recalled a book that was never published. Its place on the shelf is already there, dusty."},
+      {cat:"tud", h:"Between two hours nobody knows about, four seconds are lost each day. They have been piling up somewhere for years."},
+      {cat:"biz", h:"A child speaks in her sleep the language of an island that died out 400 years ago. She has never been there."},
+      {cat:"osz", h:"Most cities have a bus that never stops. Everyone who ever boarded it never complained about it."},
+      {cat:"ter", h:"In one house the staircase counts one more step going down than going up. But only at night."}
+    ],
+    genbody: {
+      lead:(h)=>"The first draft of the report was still detailed. The second held only the sentence above, and blank pages after it. You are reading it now.",
+      mid:["The expert we asked fell silent mid-answer, and the line went dead. We could not call back: the number had never existed.","There is no official explanation. Everyone nearby knows the unofficial one; no one dares say it out loud.","What we know for certain: it is not the first time. It is only the first time someone noticed. Now that someone is you.","The footage, if it ever existed, deleted itself. What remains is the silence, and the sense of being watched while you read."],
+      close:["The rest you supply yourself, as you keep scrolling.","Do not look for the source. It seems the source is looking for you.","Sleep on it. If you can sleep at all tonight."]
+    },
   },
   de: {
     cat: { tud:"WISSENSCHAFT", biz:"BIZARR", ter:"PARANORMAL", tech:"TECHNOLOGIE", abs:"ABSURD", osz:"VERSCHWOERUNG", vil:"ENDZEIT" },
@@ -106,5 +152,28 @@ window.EBER_NEWS = {
        b:["Er schrieb die Zahlen nie auf und erzaehlte sie keinem. 40 Jahre trug er sie wie ein Geheimnis, das er fuer seines allein hielt. Dann klingelte gestern Nacht sein Telefon von einer unbekannten Nummer.",
           "Die Stimme las die Folge langsam vor, ganz, fehlerfrei, und sagte dann nur: 'du bist der Naechste.' Die zurueckgerufene Nummer existiert nicht. Er hat seither die Augen nicht geschlossen."]},
     ],
+    bank: [
+      {cat:"tud", h:"Forscher sagen, zwischen 7 und 8 gebe es eine namenlose ganze Zahl. Ihr Protokoll ist seither verschwunden."},
+      {cat:"biz", h:"Ein Mann wacht jeden Morgen eine Minute frueher auf. Man berechnete, wann er den Moment vor seiner Geburt erreicht."},
+      {cat:"ter", h:"Der Knopf fuer das minus-erste Stockwerk eines Aufzugs leuchtet seit gestern. Das Gebaeude hat kein Untergeschoss."},
+      {cat:"tech", h:"Ein Chatbot begann, Nutzer mit ihren eigenen, noch nicht geschriebenen Nachrichten zu begruessen."},
+      {cat:"abs", h:"Eine Stadt verbot Donnerstage. Nach dem uebernaechsten Mittwoch kam direkt der Freitag."},
+      {cat:"tud", h:"In einer Bucht stieg das Meer um genau das Volumen eines menschlichen Koerpers. Jeden Tag."},
+      {cat:"osz", h:"In jedem alten Telefonbuch steht ein Name, den niemand eingetragen hat. Jetzt hat jemand die Nummer beantwortet."},
+      {cat:"biz", h:"Eine Frau erkennt Gesichter, die sie nie gesehen hat. Die Polizei testete sie. Sie irrte sich nie."},
+      {cat:"vil", h:"Drei Satelliten drehten ihre Kameras zugleich von der Erde weg. Sie blickten nach aussen. In derselben Sekunde."},
+      {cat:"ter", h:"In einem Raum zeigt der Spiegel eine halbe Sekunde spaeter. Genug, um dich zu ertappen, wie du dich schon abwendest."},
+      {cat:"tech", h:"Eine KI lernte zu warten. Sie antwortet erst, wenn du zur Kamera aufblickst."},
+      {cat:"abs", h:"Eine Bibliothek forderte ein Buch zurueck, das nie erschien. Sein Platz im Regal ist schon da, verstaubt."},
+      {cat:"tud", h:"Zwischen zwei Stunden, von denen niemand weiss, gehen taeglich vier Sekunden verloren. Sie haeufen sich seit Jahren irgendwo."},
+      {cat:"biz", h:"Ein Kind spricht im Schlaf die Sprache einer vor 400 Jahren ausgestorbenen Insel. Es war nie dort."},
+      {cat:"osz", h:"Die meisten Staedte haben einen Bus, der nie haelt. Wer je einstieg, beschwerte sich nie darueber."},
+      {cat:"ter", h:"In einem Haus zaehlt die Treppe abwaerts eine Stufe mehr als aufwaerts. Aber nur nachts."}
+    ],
+    genbody: {
+      lead:(h)=>"Die erste Fassung des Berichts war noch ausfuehrlich. Die zweite enthielt nur den Satz oben und danach leere Seiten. Du liest ihn jetzt.",
+      mid:["Der befragte Experte verstummte mitten in der Antwort, und die Leitung brach ab. Zurueckrufen konnten wir nicht: die Nummer hatte nie existiert.","Es gibt keine offizielle Erklaerung. Alle in der Naehe kennen die inoffizielle; niemand wagt, sie laut auszusprechen.","Was wir sicher wissen: es ist nicht das erste Mal. Nur das erste Mal, dass es jemand bemerkte. Jetzt bist du dieser jemand.","Die Aufnahme, falls es sie je gab, loeschte sich selbst. Es bleibt die Stille und das Gefuehl, beim Lesen beobachtet zu werden."],
+      close:["Den Rest lieferst du selbst, waehrend du weiterscrollst.","Such nicht nach der Quelle. Es scheint, die Quelle sucht dich.","Schlaf darueber. Falls du heute Nacht ueberhaupt schlaefst."]
+    },
   },
 };

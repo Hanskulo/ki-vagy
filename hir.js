@@ -39,9 +39,25 @@
   function mark(s){ return esc(s).replace(/\{([^{}]*)\}/g,(_,g)=>`<b>${g}</b>`); }
 
   if(!DATA){ $("#headline").textContent="akta nem elerheto"; return; }
-  const items = DATA.items;
-  const idx = Math.min(Math.max(id,1), items.length) - 1;
-  const art = items[idx];
+  const items = DATA.items || [];
+  const bank = DATA.bank || [];
+  const gb = DATA.genbody;
+  const bi = parseInt(qs.get("b"),10);
+  const isBank = qs.has("b") && bank.length && bi>=0;
+  let art, bodyParas;
+  if(isBank){
+    art = bank[Math.min(bi, bank.length-1)];
+    bodyParas = [];
+    if(gb){
+      bodyParas.push(gb.lead(art.h));
+      const m1=gb.mid[fileNo % gb.mid.length], m2=gb.mid[(fileNo+2) % gb.mid.length];
+      bodyParas.push(m1); if(m2!==m1) bodyParas.push(m2);
+      bodyParas.push(gb.close[fileNo % gb.close.length]);
+    } else { bodyParas = [art.h]; }
+  } else {
+    const idx = Math.min(Math.max(id,1), items.length) - 1;
+    art = items[idx]; bodyParas = art.b;
+  }
   const catLabel = (DATA.cat && DATA.cat[art.cat]) ? DATA.cat[art.cat] : "akta";
 
   document.title = art.h.slice(0,48) + " // EBER";
@@ -50,7 +66,7 @@
   $("#headline").textContent = art.h;
   $("#byline").textContent = UI.byl(catLabel.toLowerCase());
   const body = $("#body");
-  art.b.forEach((p,i)=>{ const el=document.createElement("p"); if(i===0) el.className="lead drop"; el.textContent=p; body.appendChild(el); });
+  bodyParas.forEach((p,i)=>{ const el=document.createElement("p"); if(i===0) el.className="lead drop"; el.textContent=p; body.appendChild(el); });
 
   // live csavar -- a kozos sablonokbol, determinisztikus valasztas a fileNo alapjan
   const lv = DATA.live[fileNo % DATA.live.length];
@@ -58,12 +74,16 @@
   $("#live-body").innerHTML = mark(lv(sig, points, fileNo)) + " ";
   $("#live").hidden = false;
 
-  // tovabbi aktak -- 4 masik, kevert
+  // tovabbi aktak -- items + bank kevert, 4 db, az aktualist kizarva
   $("#more-h").textContent = UI.more;
   const more = $("#more");
-  const others = items.map((_,i)=>i).filter(i=>i!==idx);
-  for(let i=others.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); const t=others[i]; others[i]=others[j]; others[j]=t; }
-  others.slice(0,4).forEach(i=>{ const a=document.createElement("a"); a.href=`hir.html?id=${i+1}&lang=${lang}`; a.textContent=items[i].h; more.appendChild(a); });
+  const curHref = isBank ? `hir.html?b=${bi}&lang=${lang}` : `hir.html?id=${id}&lang=${lang}`;
+  const pool = [];
+  items.forEach((it,i)=>pool.push({href:`hir.html?id=${i+1}&lang=${lang}`, h:it.h}));
+  bank.forEach((it,i)=>pool.push({href:`hir.html?b=${i}&lang=${lang}`, h:it.h}));
+  const pool2 = pool.filter(p=>p.href!==curHref);
+  for(let i=pool2.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); const t=pool2[i]; pool2[i]=pool2[j]; pool2[j]=t; }
+  pool2.slice(0,4).forEach(p=>{ const a=document.createElement("a"); a.href=p.href; a.textContent=p.h; more.appendChild(a); });
 
   const back=$("#back"); back.textContent=UI.back; back.href=`./?lang=${lang}`;
 })();
