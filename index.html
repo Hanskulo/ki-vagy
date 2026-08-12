@@ -3,57 +3,65 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>ki vagy?</title>
-<meta name="description" content="Ki vagy? Egy elo, dühös, reagalo szervezet, ami megtamad a kepernyon keresztul. Neon, glitch, valos ideju megfigyeles.">
+<title>ne nyisd meg</title>
+<meta name="description" content="Ne nyisd meg. En figyellek. Egy elo entitas, ami az elso masodpercben tudja, ki vagy, honnan jossz, mit hasznalsz. Minden a te gepeden fut.">
 <meta name="color-scheme" content="dark">
-<meta name="theme-color" content="#0a0a0f">
-<meta property="og:title" content="KI VAGY?">
-<meta property="og:description" content="Egy elo szervezet a kepernyo masik oldalan. Megtamad, mielott megszolalnal. Lepj be, ha mered.">
+<meta name="theme-color" content="#050505">
+<meta property="og:title" content="Ne nyisd meg. En figyellek.">
+<meta property="og:description" content="Egy elo entitas a kepernyo masik oldalan. Az elso masodpercben tudja, honnan jossz. Ne nyisd meg.">
 <meta property="og:type" content="website">
 <meta property="og:image" content="https://hanskulo.github.io/ki-vagy/og.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%230a0a0f'/%3E%3Ccircle cx='50' cy='50' r='30' fill='none' stroke='%2300f0ff' stroke-width='7'/%3E%3Ccircle cx='50' cy='50' r='10' fill='%23ff006e'/%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23050505'/%3E%3Ccircle cx='50' cy='50' r='30' fill='none' stroke='%23ff4d00' stroke-width='7'/%3E%3Ccircle cx='50' cy='50' r='10' fill='%23ff4d00'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css?v=11">
 </head>
 <body>
 <img src="https://visitor-counter.eltewedtem.workers.dev/px?site=ki-vagy" width="1" height="1" alt="" aria-hidden="true" style="position:absolute;left:-9999px;top:0;opacity:0">
-<canvas id="dust" class="dust" aria-hidden="true"></canvas>
-<div class="scanlines" aria-hidden="true"></div>
-<div class="vignette" aria-hidden="true"></div>
-<div id="scanbeam" class="scanbeam" aria-hidden="true"></div>
-<div id="redpulse" class="redpulse" aria-hidden="true"></div>
 
+<canvas id="fluid" class="fluid" aria-hidden="true"></canvas>
+<div class="grain" aria-hidden="true"></div>
+<div id="vignette" class="vignette" aria-hidden="true"></div>
+<div id="cursor" class="cursor" aria-hidden="true"><span class="cur-dot"></span><span class="cur-ring"></span></div>
+<div id="crash" class="crash" aria-hidden="true"></div>
+
+<!-- BIOMETRIKUS ATJARO -->
 <div id="gate" class="gate">
-  <div class="mesh" aria-hidden="true"><span class="blob b1"></span><span class="blob b2"></span><span class="blob b3"></span></div>
-  <div class="grain" aria-hidden="true"></div>
-  <div id="spotlight" class="spotlight" aria-hidden="true"></div>
-  <div id="ripplebox" class="ripplebox" aria-hidden="true"></div>
-  <div class="hero">
-    <p class="hero-top"><span class="livedot" id="livedot"></span><span id="gate-brand">megfigyelo terminal</span></p>
-    <h1 class="hero-title glitch-hero" id="hero-title" data-text="KI VAGY?" aria-label="ki vagy?"></h1>
-    <p class="hero-line" id="gate-line">valaki figyel a sotetbol.</p>
-    <p class="hero-idle" id="hero-idle" aria-hidden="true"></p>
-    <button id="gate-btn" class="hang-btn" type="button">
-      <span class="hang-label" id="gate-btn-label">&#9654; HANG BEKAPCSOLASA</span>
-      <span class="eq" id="eq" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
-    </button>
-    <p class="hero-sub" id="gate-sub">egyedul ajanlott.</p>
+  <div class="gate-wrap">
+    <p class="gate-brand"><span class="livedot" id="livedot"></span><span id="gate-brand">EBER</span></p>
+    <h1 class="ent-title" id="ent-title" aria-label="ne nyisd meg">NE NYISD MEG</h1>
+    <p class="ent-sub" id="ent-sub">en figyellek.</p>
+    <p class="bio-line" id="bio-line" aria-live="polite">&nbsp;</p>
+    <div class="gate-actions">
+      <button id="enter-btn" class="enter-btn" type="button" data-mag>
+        <span class="eb-face">BELEPES</span>
+      </button>
+      <button id="gate-btn" class="sound-btn-sm" type="button" data-mag>
+        <span id="gate-btn-label">&#9654; hang</span>
+      </button>
+    </div>
+    <p class="gate-hint" id="gate-hint">egyedul ajanlott.</p>
   </div>
+</div>
+
+<!-- BOOT: fekete -> szivveres -> dekodolas -->
+<div id="boot" class="boot" hidden>
+  <div class="boot-heart" id="boot-heart" aria-hidden="true"></div>
+  <p class="boot-text" id="boot-text"></p>
 </div>
 
 <main id="screen" class="screen" role="main">
   <nav id="nav" class="nav" aria-label="menu">
-    <span class="brand"><span class="brand-eye">&#9673;</span> <span id="brand-name" class="glitch-mini" data-text="EBER">EBER</span></span>
+    <span class="brand"><span class="brand-eye" id="brand-eye">&#9673;</span> <span id="brand-name">EBER</span></span>
     <ul class="menu">
-      <li><button class="mi" data-action="aktad">AKTAD</button></li>
-      <li><button class="mi" data-action="hirek">HIREK</button></li>
-      <li><button class="mi" data-action="gep">A GEP</button></li>
-      <li><button class="mi" data-action="ujra">UJRA</button></li>
+      <li><button class="mi" data-action="profil" data-mag>TE</button></li>
+      <li><button class="mi" data-action="halo" data-mag>HALO</button></li>
+      <li><button class="mi" data-action="entitas" data-mag>EN</button></li>
+      <li><button class="mi" data-action="ujra" data-mag>UJRAKAPCSOLAS</button></li>
       <li class="langsel">
         <button class="ls" data-lang="hu">HU</button><button class="ls" data-lang="de">DE</button><button class="ls" data-lang="en">EN</button>
       </li>
@@ -61,34 +69,34 @@
     </ul>
   </nav>
 
-  <div id="ticker" class="ticker"><span class="ticker-label" id="ticker-label">// ELO ADAS</span><div class="ticker-view"><div class="ticker-track" id="ticker-track"></div></div></div>
+  <div id="ticker" class="ticker"><span class="ticker-label" id="ticker-label">// HALO</span><div class="ticker-view"><div class="ticker-track" id="ticker-track"></div></div></div>
 
   <header class="titlebar" aria-hidden="true">
-    <span class="glitch" data-text="KI VAGY?" id="bigtitle">KI VAGY?</span>
+    <span class="mtitle" id="bigtitle">EBER</span>
   </header>
 
-  <section id="output" class="output" aria-live="polite" aria-label="terminal"></section>
+  <section id="output" class="output" aria-live="polite" aria-label="entitas"></section>
 
   <div id="promptline" class="promptline" hidden>
-    <span class="ps1" id="ps1">te@megjelolt</span><span class="sep">:</span><span class="cwd">~</span><span class="dollar">$&nbsp;</span><span id="typed" class="typed"></span><span class="caret" id="caret">&#9608;</span>
+    <span class="ps1" id="ps1">te</span><span class="dollar">&nbsp;&#8250;&nbsp;</span><span id="typed" class="typed"></span><span class="caret" id="caret">&#9608;</span>
   </div>
 
-  <input id="hiddeninput" class="hiddeninput" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" aria-label="parancs bevitele" />
+  <input id="hiddeninput" class="hiddeninput" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" aria-label="valasz" />
 </main>
 
-<script src="news-data.js?v=10"></script>
+<script src="news-data.js?v=11"></script>
 
 <div id="newsbar" class="newsbar">
-  <span class="nb-label" id="nb-label">HIRHALO</span>
+  <span class="nb-label" id="nb-label">HALO</span>
   <div class="nb-view"><div class="nb-track" id="nb-track"></div></div>
 </div>
 
 <footer id="statusbar" class="statusbar" aria-hidden="true">
-  <span id="st-left">-- ALVO --</span>
+  <span id="st-left">-- ELO --</span>
   <span id="st-mid"></span>
   <span id="st-right">--:--:--</span>
 </footer>
 
-<script src="app.js?v=10"></script>
+<script src="app.js?v=11"></script>
 </body>
 </html>

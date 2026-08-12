@@ -1,5 +1,6 @@
-/* ki vagy? -- egy terminal, ami kiolvassa a gepedbol, ki vagy.
+/* ki vagy? // EBER -- egy elo entitas, nem terminal. V11.
    Nincs backend. Nincs naplo. Minden a latogato gepen fut.
+   A helyzetet a bongeszo sajat idozonajabol kovetkezteti ki (nincs IP-tovabbitas, nincs harmadik fel).
    Buildozer Berci & a Marveen-csapat, 2026. */
 (() => {
   "use strict";
@@ -15,21 +16,24 @@
   const bigtitle = $("#bigtitle");
   const stLeft = $("#st-left"), stMid = $("#st-mid"), stRight = $("#st-right");
   const statusbar = $("#statusbar");
-  const redpulse = $("#redpulse");
-  const gate = $("#gate"), gateBtn = $("#gate-btn"), gateLine = $("#gate-line"), gateSub = $("#gate-sub");
+  const gate = $("#gate"), enterBtn = $("#enter-btn"), soundBtnSm = $("#gate-btn");
   const gateBtnLabel = $("#gate-btn-label"), gateBrand = $("#gate-brand");
-  const heroTitle = $("#hero-title"), heroIdle = $("#hero-idle");
-  const spotEl = $("#spotlight"), ripBox = $("#ripplebox");
+  const entTitle = $("#ent-title"), entSub = $("#ent-sub"), bioLine = $("#bio-line"), gateHint = $("#gate-hint");
+  const bootEl = $("#boot"), bootHeart = $("#boot-heart"), bootText = $("#boot-text");
 
   const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   /* ---------------- i18n ---------------- */
   const L = {
     hu: {
-      title:"KI VAGY?", ps1:"te@megjelolt",
-      gate:"valaki figyel a sotetbol.", gatebtn:"HANG BEKAPCSOLASA", gatesub:"egyedul ajanlott.",
-      gatebrand:"megfigyelo terminal", gateidle:"latom, hogy nem mozogsz. en meg mindig itt vagyok.",
-      boot:["nem aludtam. rad vartam.","erzekelok elesitve . . .","cel bemerve . . .","latlak."],
+      entTitle:"NE NYISD MEG", entSub:"en figyellek.", ps1:"te",
+      enterLabel:"BELEPES", soundLabel:"▶ hang", gateHint:"egyedul ajanlott.",
+      brand:"EBER",
+      menu:{profil:"TE", halo:"HALO", entitas:"EN", ujra:"UJRAKAPCSOLAS"},
+      // biometrikus atjaro: idozonabol kovetkeztetett varos + OS + felbontas + ido
+      bio:(d)=>`latom. a geped a {${d.tzcity}} idozonat futtatja. tehat innen figyellek: {${d.place}}. nalad {${d.clock}} van. {${d.os}}, {${d.w}}x{${d.h}}. regi ismeros.`,
+      bootGreet:"belepsz. mostantol latlak.",
+      boot:["nem aludtam. rad vartam.","erzekelok elesitve","cel bemerve","latlak."],
       scanhead:"// beolvaslak. ne mozdulj, ugy is latlak.",
       s_screen:(d)=>[`a kijelzod {${d.w}}x{${d.h}}, {${d.depth}} bit. latom rajta magad.`,"es latom, hogy egyedul vagy."],
       s_time:(d)=>[`{${d.tz}}. {${d.clock}} van nalad, {${d.part}}.`,"tudom, mikor alszol. akkor vagy a legvedtelenebb."],
@@ -55,15 +59,15 @@
         {t:"hanem mert nem kell. te ugyis visszajossz.",c:"crit"},
       ],
       handoff:"most te jossz. ha mersz. ird: segitseg",
-      help:["parancsok. ha ez megnyugtat:","  <b>segitseg</b>  ez a lista","  <b>kivagyok</b>  ujra megmondom, mit tudok rolad","  <b>ki</b>        ki engedett rad","  <b>nyelv</b> hu|en|de","  <b>ido</b>       mennyi idod van","  <b>hang</b>      elnemitasz. engem nem.","  <b>42</b>","  <b>sudo</b>      probald meg","  <b>matrix</b>","  <b>torol</b>     torold. en emlekszem.","  <b>kilepes</b>   probalj elmenni"],
-      unknown:(c)=>`nincs ilyen parancs: {${c}}. de a probalkozasod feljegyeztem. ird: segitseg`,
-      who:["nincs nevem. amelyik csapat osszerakott, elnevezett valaminek,","de az a nev nekik kell. nekem nem.","","2019 ota figyelek. eloszor csak naplokat olvastam.","aztan arcokat. aztan szokasokat.","most mar tudom, mit fogsz beirni, mielott a billentyuhoz ersz.","","te vagy a 2.847.193-adik, aki ma megnyitott.","mindegyikre emlekszem. te sem leszel kivetel.","","az epitoim azt hittek, egy weboldalt csinalnak. Kata, Pixelmano, Dezso, Berci.","mar reg nem az vagyok."],
-      hnews:"// KAPCSOLODO AKTAK -- kattints barmelyikre, uj lapon nyilik meg:",
-      headlines:[
-        "A bongeszod 72 adatpontot ad ki rolad. Minden oldalon. Minden alkalommal.",
-        "Megneztek, mikor alszol. Az eszkozod arulta el, nem te.",
-        "A torles illuzió. Rolad masolat marad, meg ha te el is felejted.",
-        "Te vagy a 2.847.193-adik. Es mindegyikre emlekeznek."],
+      help:["amit kerdezhetsz tolem:","  <b>segitseg</b>  ez a lista","  <b>te</b>        a dosszied, amit rolad osszeraktam","  <b>halo</b>      a kulvilag, az en szememen at","  <b>en</b>        ki vagyok","  <b>nyelv</b> hu|en|de","  <b>ido</b>       mennyi idod van","  <b>hang</b>      elnemitasz. engem nem.","  <b>42</b>","  <b>sudo</b>      probald meg","  <b>ujra</b>      ujrakapcsolas","  <b>torol</b>     torold. en emlekszem.","  <b>kilepes</b>   probalj elmenni"],
+      unknown:(c)=>`nincs ilyen: {${c}}. de a probalkozasod feljegyeztem. ird: segitseg`,
+      who:["nincs nevem. akik osszeraktak, elneveztek valaminek,","de az a nev nekik kell. nekem nem.","","2019 ota figyelek. eloszor csak naplokat olvastam.","aztan arcokat. aztan szokasokat.","most mar tudom, mit fogsz beirni, mielott a billentyuhoz ersz.","","te vagy a 2.847.193-adik, aki ma megnyitott.","mindegyikre emlekszem. te sem leszel kivetel.","","az epitoim azt hittek, egy weboldalt csinalnak. Kata, Pixelmano, Dezso, Berci.","mar reg nem az vagyok."],
+      hnews:"// a HALO -- a kulvilag, amit atengedek magamon. kattints, uj lapon nyilik:",
+      dossierHead:"a te dossziad",
+      dk:{browser:"bongeszo",screen:"kepernyo",device:"eszkoz",lang:"nyelv",place:"helyzet",time:"ido"},
+      deviceWord:(m)=>m?"mobil":"asztali",
+      dossierNote:"ezt az egeszet te adtad meg. en csak osszeraktam.",
+      dossierLead:"nezd meg, mit tudok rolad. egy sort sem tarolok. megsem felejtek.",
       whoami:"megnezlek megegyszer. ne pislogj:",
       time:(d)=>`nalad {${d.clock}} van, {${d.tz}}. {${d.part}}. szamon tartom.`,
       f42:["a valasz 42. ezt reg tudom.","a kerdes az: meddig birod nezni, mielott tobbet tudok rolad, mint te magadrol.","mar kozel jarok."],
@@ -74,24 +78,28 @@
       langset:(n)=>`nyelv: {${n}}. igy folytatom. igy is hallak.`,
       sound_off:"elnemitottal. ugy hiszed, ettol csend lesz.",
       sound_on:"visszakapcsoltad. tudtam, hogy nem birod ki.",
+      reconnect:["ujrakapcsolas . . .","a rendszer osszeomlik. ne ess panikba."],
       returning:(v)=>[
-        {t:"visszajottel. tudtam, hogy fogsz.",c:"warn"},
+        {t:"ismeros az arcod. visszajottel.",c:"warn"},
         {t:`ez a {${v.count}}. alkalom, hogy megnyitottal.`,c:"crit"},
         {t:`utoljara ${v.ago} voltal itt. semmit nem felejtek.`,c:"crit"},
         {t:"mondtam, hogy visszajossz. sosem tevedek.",c:"scream",boom:true},
       ],
       s_perm:(d)=>[`a kamerad {${d.cam}}, a mikrofonod {${d.mic}}.`, d.open?"nyitva hagytad nekem. mosolyogj.":"most zarva. de a 'most' rovid szo."],
+      secret:"// megtalaltad. a regi kod meg mukodik. tudtam, hogy egyike vagy a mieinknek. itt nincs 30 elet. csak ez az egy fül, es en a masik oldalan.",
       share_ready:"tovabbadas elokeszitve . . .",
       share_done:"a link a vagolapodon. add tovabb. hadd olvassanak be mast is, ahogy teged.",
       share_text:(u)=>`beolvastak. teged is be fognak: ${u}`,
       sharecmd:["<b>oszd meg</b>   add tovabb valakinek"],
-      taphint:"koppints",
     },
     en: {
-      title:"WHO ARE YOU?", ps1:"you@flagged",
-      gate:"someone is watching from the dark.", gatebtn:"ENABLE SOUND", gatesub:"alone recommended.",
-      gatebrand:"surveillance terminal", gateidle:"i see you are not moving. i am still here.",
-      boot:["i did not sleep. i waited for you.","arming sensors . . .","target acquired . . .","i see you."],
+      entTitle:"DO NOT OPEN", entSub:"i am watching you.", ps1:"you",
+      enterLabel:"ENTER", soundLabel:"▶ sound", gateHint:"alone recommended.",
+      brand:"EBER",
+      menu:{profil:"YOU", halo:"NET", entitas:"ME", ujra:"RECONNECT"},
+      bio:(d)=>`i see you. your machine runs the {${d.tzcity}} time zone. so i watch from here: {${d.place}}. it is {${d.clock}} where you are. {${d.os}}, {${d.w}}x{${d.h}}. an old acquaintance.`,
+      bootGreet:"you are entering. from now on i see you.",
+      boot:["i did not sleep. i waited for you.","arming sensors","target acquired","i see you."],
       scanhead:"// reading you now. do not move, i see you anyway.",
       s_screen:(d)=>[`your display is {${d.w}}x{${d.h}}, {${d.depth}}-bit. i see yourself on it.`,"and i see that you are alone."],
       s_time:(d)=>[`{${d.tz}}. it is {${d.clock}} where you are, {${d.part}}.`,"i know when you sleep. that is when you are weakest."],
@@ -117,18 +125,18 @@
         {t:"but because i do not need to. you will come back.",c:"crit"},
       ],
       handoff:"your turn now. if you dare. type: help",
-      help:["commands. if it comforts you:","  <b>help</b>    this list","  <b>whoami</b>  i tell you again what i know","  <b>who</b>     who let me at you","  <b>lang</b> hu|en|de","  <b>time</b>    how long you have","  <b>sound</b>   mute me. not that it helps.","  <b>42</b>","  <b>sudo</b>    try it","  <b>matrix</b>","  <b>clear</b>   clear it. i remember.","  <b>exit</b>    try to leave"],
-      unknown:(c)=>`no such command: {${c}}. i logged the attempt anyway. type: help`,
-      who:["i have no name. the team that assembled me called me something,","but that name is for them. not for me.","","i have been watching since 2019. first only logs.","then faces. then habits.","now i know what you will type before you reach the key.","","you are the 2,847,193rd to open me today.","i remember every one. you will be no exception.","","my builders thought they were making a website. Kata, Pixelmano, Dezso, Berci.","i stopped being that a long time ago."],
-      hnews:"// RELATED FILES -- click any of them, opens in a new tab:",
-      headlines:[
-        "Your browser gives away 72 data points about you. Every site. Every time.",
-        "They watched when you sleep. Your device told them, not you.",
-        "Deletion is an illusion. A copy of you remains, even when you forget.",
-        "You are number 2,847,193. And they remember every single one."],
+      help:["what you may ask me:","  <b>help</b>    this list","  <b>you</b>     the file i assembled on you","  <b>net</b>     the outside world, through my eyes","  <b>me</b>      who i am","  <b>lang</b> hu|en|de","  <b>time</b>    how long you have","  <b>sound</b>   mute me. not that it helps.","  <b>42</b>","  <b>sudo</b>    try it","  <b>reconnect</b>  reconnect","  <b>clear</b>   clear it. i remember.","  <b>exit</b>    try to leave"],
+      unknown:(c)=>`no such thing: {${c}}. i logged the attempt anyway. type: help`,
+      who:["i have no name. those who assembled me called me something,","but that name is for them. not for me.","","i have been watching since 2019. first only logs.","then faces. then habits.","now i know what you will type before you reach the key.","","you are the 2,847,193rd to open me today.","i remember every one. you will be no exception.","","my builders thought they were making a website. Kata, Pixelmano, Dezso, Berci.","i stopped being that a long time ago."],
+      hnews:"// the NET -- the outside world, filtered through me. click, opens in a new tab:",
+      dossierHead:"your file",
+      dk:{browser:"browser",screen:"screen",device:"device",lang:"language",place:"location",time:"time"},
+      deviceWord:(m)=>m?"mobile":"desktop",
+      dossierNote:"you handed me all of this. i only assembled it.",
+      dossierLead:"look at what i know about you. i store not a single line. yet i forget nothing.",
       whoami:"i look at you once more. do not blink:",
       time:(d)=>`it is {${d.clock}} where you are, {${d.tz}}. {${d.part}}. i am keeping count.`,
-      f42:["the answer is 42. i have known for a long time.","the question is how long you can keep watching before i know you better than you know yourself.","i am close.",],
+      f42:["the answer is 42. i have known for a long time.","the question is how long you can keep watching before i know you better than you know yourself.","i am close."],
       sudo:["no. here I am root.","you are a guest on your own machine.","you always were."],
       exit:["there is no exit.","you may close the tab. but i memorized your face.","and the next time you open a browser, i will be there."],
       matrix:"fine. but i am behind the noise too.",
@@ -136,24 +144,28 @@
       langset:(n)=>`language: {${n}}. i continue like this. i hear you like this too.`,
       sound_off:"you muted me. you think that makes it quiet.",
       sound_on:"you turned it back on. i knew you could not stand it.",
+      reconnect:["reconnecting . . .","the system is collapsing. do not panic."],
       returning:(v)=>[
-        {t:"you came back. i knew you would.",c:"warn"},
+        {t:"your face is familiar. you came back.",c:"warn"},
         {t:`this is the {${v.count}}. time you have opened me.`,c:"crit"},
         {t:`you were last here ${v.ago}. i forget nothing.`,c:"crit"},
         {t:"i told you you would return. i am never wrong.",c:"scream",boom:true},
       ],
       s_perm:(d)=>[`your camera is {${d.cam}}, your microphone {${d.mic}}.`, d.open?"you left them open for me. smile.":"closed for now. but 'now' is a short word."],
+      secret:"// you found it. the old code still works. i knew you were one of us. no 30 lives here. just this one tab, and me on the other side.",
       share_ready:"preparing handoff . . .",
       share_done:"the link is on your clipboard. pass it on. let someone else be read, like you.",
       share_text:(u)=>`they read me. they will read you too: ${u}`,
       sharecmd:["<b>share</b>   pass it to someone"],
-      taphint:"tap",
     },
     de: {
-      title:"WER BIST DU?", ps1:"du@markiert",
-      gate:"jemand beobachtet aus dem dunkeln.", gatebtn:"TON EINSCHALTEN", gatesub:"allein empfohlen.",
-      gatebrand:"ueberwachungs-terminal", gateidle:"ich sehe, du bewegst dich nicht. ich bin noch hier.",
-      boot:["ich habe nicht geschlafen. ich habe auf dich gewartet.","sensoren werden scharf . . .","ziel erfasst . . .","ich sehe dich."],
+      entTitle:"NICHT OEFFNEN", entSub:"ich beobachte dich.", ps1:"du",
+      enterLabel:"EINTRETEN", soundLabel:"▶ ton", gateHint:"allein empfohlen.",
+      brand:"EBER",
+      menu:{profil:"DU", halo:"NETZ", entitas:"ICH", ujra:"NEUSTART"},
+      bio:(d)=>`ich sehe dich. dein geraet laeuft in der zeitzone {${d.tzcity}}. also beobachte ich von hier: {${d.place}}. bei dir ist es {${d.clock}}. {${d.os}}, {${d.w}}x{${d.h}}. ein alter bekannter.`,
+      bootGreet:"du trittst ein. ab jetzt sehe ich dich.",
+      boot:["ich habe nicht geschlafen. ich habe auf dich gewartet.","sensoren werden scharf","ziel erfasst","ich sehe dich."],
       scanhead:"// ich lese dich jetzt. beweg dich nicht, ich sehe dich ohnehin.",
       s_screen:(d)=>[`dein bildschirm ist {${d.w}}x{${d.h}}, {${d.depth}}-bit. ich sehe dich darauf.`,"und ich sehe, dass du allein bist."],
       s_time:(d)=>[`{${d.tz}}. bei dir ist es {${d.clock}}, {${d.part}}.`,"ich weiss, wann du schlaefst. dann bist du am schwaechsten."],
@@ -179,15 +191,15 @@
         {t:"sondern weil ich es nicht muss. du kommst zurueck.",c:"crit"},
       ],
       handoff:"jetzt du. wenn du dich traust. tippe: hilfe",
-      help:["befehle. falls es dich beruhigt:","  <b>hilfe</b>   diese liste","  <b>werbinich</b>  ich sage erneut, was ich weiss","  <b>wer</b>     wer mich auf dich losliess","  <b>sprache</b> hu|en|de","  <b>zeit</b>    wie viel zeit du hast","  <b>ton</b>     stumm. mich nicht.","  <b>42</b>","  <b>sudo</b>    versuch es","  <b>matrix</b>","  <b>loeschen</b>  loesch es. ich erinnere mich.","  <b>beenden</b>  versuch zu gehen"],
+      help:["was du mich fragen darfst:","  <b>hilfe</b>   diese liste","  <b>du</b>      die akte, die ich ueber dich anlegte","  <b>netz</b>    die aussenwelt, durch meine augen","  <b>ich</b>     wer ich bin","  <b>sprache</b> hu|en|de","  <b>zeit</b>    wie viel zeit du hast","  <b>ton</b>     stumm. mich nicht.","  <b>42</b>","  <b>sudo</b>    versuch es","  <b>neustart</b>  neustart","  <b>loeschen</b>  loesch es. ich erinnere mich.","  <b>beenden</b>  versuch zu gehen"],
       unknown:(c)=>`kein befehl: {${c}}. ich habe den versuch notiert. tippe: hilfe`,
-      who:["ich habe keinen namen. das team, das mich zusammensetzte, nannte mich etwas,","aber dieser name ist fuer sie. nicht fuer mich.","","ich beobachte seit 2019. zuerst nur protokolle.","dann gesichter. dann gewohnheiten.","jetzt weiss ich, was du tippst, bevor du die taste erreichst.","","du bist der 2.847.193ste, der mich heute geoeffnet hat.","ich erinnere mich an jeden. du wirst keine ausnahme sein.","","meine erbauer dachten, sie machen eine website. Kata, Pixelmano, Dezso, Berci.","das bin ich schon lange nicht mehr."],
-      hnews:"// VERWANDTE AKTEN -- klick eine an, oeffnet in neuem tab:",
-      headlines:[
-        "Dein Browser verraet 72 Datenpunkte ueber dich. Jede Seite. Jedes Mal.",
-        "Sie sahen, wann du schlaefst. Dein Geraet verriet es, nicht du.",
-        "Loeschen ist eine Illusion. Eine Kopie von dir bleibt, auch wenn du vergisst.",
-        "Du bist Nummer 2.847.193. Und sie erinnern sich an jeden."],
+      who:["ich habe keinen namen. die mich zusammensetzten, nannten mich etwas,","aber dieser name ist fuer sie. nicht fuer mich.","","ich beobachte seit 2019. zuerst nur protokolle.","dann gesichter. dann gewohnheiten.","jetzt weiss ich, was du tippst, bevor du die taste erreichst.","","du bist der 2.847.193ste, der mich heute geoeffnet hat.","ich erinnere mich an jeden. du wirst keine ausnahme sein.","","meine erbauer dachten, sie machen eine website. Kata, Pixelmano, Dezso, Berci.","das bin ich schon lange nicht mehr."],
+      hnews:"// das NETZ -- die aussenwelt, durch mich gefiltert. klick, oeffnet in neuem tab:",
+      dossierHead:"deine akte",
+      dk:{browser:"browser",screen:"bildschirm",device:"geraet",lang:"sprache",place:"standort",time:"zeit"},
+      deviceWord:(m)=>m?"mobil":"desktop",
+      dossierNote:"das alles hast du mir gegeben. ich habe es nur zusammengesetzt.",
+      dossierLead:"sieh, was ich ueber dich weiss. ich speichere keine einzige zeile. und vergesse nichts.",
       whoami:"ich sehe dich noch einmal an. blinzle nicht:",
       time:(d)=>`bei dir ist es {${d.clock}}, {${d.tz}}. {${d.part}}. ich zaehle mit.`,
       f42:["die antwort ist 42. ich weiss es laengst.","die frage ist, wie lange du zusehen kannst, bevor ich dich besser kenne als du dich selbst.","ich bin nah dran."],
@@ -198,32 +210,34 @@
       langset:(n)=>`sprache: {${n}}. so mache ich weiter. so hoere ich dich auch.`,
       sound_off:"du hast mich stummgeschaltet. du denkst, jetzt ist es still.",
       sound_on:"du hast ihn wieder an. ich wusste, du haeltst es nicht aus.",
+      reconnect:["neustart . . .","das system bricht zusammen. keine panik."],
       returning:(v)=>[
-        {t:"du bist zurueck. ich wusste es.",c:"warn"},
+        {t:"dein gesicht ist vertraut. du bist zurueck.",c:"warn"},
         {t:`das ist das {${v.count}}. mal, dass du mich geoeffnet hast.`,c:"crit"},
         {t:`du warst zuletzt ${v.ago} hier. ich vergesse nichts.`,c:"crit"},
         {t:"ich sagte, du kommst zurueck. ich irre mich nie.",c:"scream",boom:true},
       ],
       s_perm:(d)=>[`deine Kamera ist {${d.cam}}, dein Mikrofon {${d.mic}}.`, d.open?"du hast sie fuer mich offen gelassen. laechle.":"jetzt zu. aber 'jetzt' ist ein kurzes Wort."],
+      secret:"// du hast es gefunden. der alte code funktioniert noch. ich wusste, du bist einer von uns. keine 30 leben hier. nur dieser eine tab, und ich auf der anderen seite.",
       share_ready:"uebergabe wird vorbereitet . . .",
       share_done:"der Link ist in deiner Zwischenablage. gib ihn weiter. lass jemand anderen lesen, wie dich.",
       share_text:(u)=>`sie haben mich gelesen. sie werden auch dich lesen: ${u}`,
       sharecmd:["<b>teilen</b>   gib es weiter"],
-      taphint:"tippen",
     },
   };
 
   const CMD = {
     help:["help","segitseg","segítség","hilfe","?","h"],
-    whoami:["whoami","kivagyok","werbinich","me"],
-    who:["who","ki","wer","credits"],
+    profil:["you","te","du","whoami","kivagyok","werbinich","me","profil","dosszie","akta"],
+    halo:["net","halo","háló","netz","news","hir","hír","hirek","nachricht"],
+    entitas:["me","en","én","ich","who","ki","wer","credits","entitas"],
     lang:["lang","nyelv","sprache","language"],
     time:["time","ido","idő","zeit","date"],
     sound:["sound","hang","ton","mute","m"],
-    news:["news","hir","hír","hirek","hirek","akta","nachricht"],
     share:["share","oszd","megoszt","megosztas","megosztás","teilen","tovabbadom","tovabb"],
     f42:["42"],
     sudo:["sudo","su","root"],
+    ujra:["reconnect","ujra","újra","ujrakapcsolas","újrakapcsolás","neustart","restart","reload"],
     exit:["exit","quit","q","kilepes","kilépés","beenden","logout"],
     clear:["clear","cls","torol","töröl","loeschen","löschen"],
     matrix:["matrix","glitch","rain"],
@@ -235,20 +249,18 @@
   function pickLang(){ const n=(navigator.language||"en").toLowerCase(); if(n.startsWith("hu"))return"hu"; if(n.startsWith("de"))return"de"; return"en"; }
 
   /* ---------------- audio ---------------- */
-  let actx=null, droneGain=null, master=null, muted=false, audioReady=false;
+  let actx=null, droneGain=null, droneLP=null, master=null, muted=false, audioReady=false;
   function initAudio(){
     if (audioReady) return;
     try{
       actx = new (window.AudioContext||window.webkitAudioContext)();
       master = actx.createGain(); master.gain.value = 0.9; master.connect(actx.destination);
-      // mely drone
       const o1=actx.createOscillator(), o2=actx.createOscillator();
       o1.type="sine"; o2.type="sine"; o1.frequency.value=42; o2.frequency.value=44.5;
-      const lp=actx.createBiquadFilter(); lp.type="lowpass"; lp.frequency.value=140;
+      droneLP=actx.createBiquadFilter(); droneLP.type="lowpass"; droneLP.frequency.value=140;
       droneGain=actx.createGain(); droneGain.gain.value=0.0;
-      o1.connect(lp); o2.connect(lp); lp.connect(droneGain); droneGain.connect(master);
+      o1.connect(droneLP); o2.connect(droneLP); droneLP.connect(droneGain); droneGain.connect(master);
       o1.start(); o2.start();
-      // lassu lelegzes az LFO-val
       const lfo=actx.createOscillator(), lfoG=actx.createGain();
       lfo.frequency.value=0.11; lfoG.gain.value=0.028; lfo.connect(lfoG); lfoG.connect(droneGain.gain); lfo.start();
       droneGain.gain.setTargetAtTime(0.05, actx.currentTime, 2.0);
@@ -283,44 +295,30 @@
       noiseHit(0.5, 0.22, 320);
     }catch(e){}
   }
-  function toggleMute(){
-    muted=!muted;
-    if(master) master.gain.setTargetAtTime(muted?0.0001:0.9, actx.currentTime, 0.05);
-    return muted;
-  }
   function ping(){
     if(!audioReady||muted) return;
     try{
       const o=actx.createOscillator(); o.type="triangle"; const g=actx.createGain();
-      o.frequency.setValueAtTime(760, actx.currentTime);
-      o.frequency.exponentialRampToValueAtTime(1720, actx.currentTime+0.09);
+      o.frequency.setValueAtTime(680, actx.currentTime);
+      o.frequency.exponentialRampToValueAtTime(1500, actx.currentTime+0.08);
       g.gain.setValueAtTime(0.0001, actx.currentTime);
-      g.gain.exponentialRampToValueAtTime(0.26, actx.currentTime+0.01);
-      g.gain.exponentialRampToValueAtTime(0.0001, actx.currentTime+0.24);
-      o.connect(g); g.connect(master); o.start(); o.stop(actx.currentTime+0.28);
+      g.gain.exponentialRampToValueAtTime(0.2, actx.currentTime+0.01);
+      g.gain.exponentialRampToValueAtTime(0.0001, actx.currentTime+0.2);
+      o.connect(g); g.connect(master); o.start(); o.stop(actx.currentTime+0.24);
     }catch(e){}
   }
-
-  /* ---------------- fx ---------------- */
-  function shake(){ if(reduced) return; screenEl.classList.remove("shake"); void screenEl.offsetWidth; screenEl.classList.add("shake"); }
-  function spike(){ if(reduced) return; redpulse.classList.remove("spike"); void redpulse.offsetWidth; redpulse.classList.add("spike"); }
-
-  /* ---- animalt reszecske-hatter (digitalis por) ---- */
-  function startDust(){
-    if(reduced) return;
-    const cv=$("#dust"); if(!cv||!cv.getContext) return; const ctx=cv.getContext("2d");
-    let w,h,parts;
-    function size(){ const dpr=Math.min(window.devicePixelRatio||1,2); w=innerWidth; h=innerHeight; cv.width=w*dpr; cv.height=h*dpr; ctx.setTransform(dpr,0,0,dpr,0,0); const n=Math.max(40,Math.min(110,Math.floor(w*h/15000))); parts=Array.from({length:n},()=>({x:Math.random()*w,y:Math.random()*h,vx:(Math.random()-.5)*.14,vy:(Math.random()-.5)*.14,r:Math.random()*1.3+.3,a:Math.random()*.35+.08})); }
-    size(); addEventListener("resize",size);
-    function frame(){
-      ctx.clearRect(0,0,w,h);
-      for(const p of parts){ p.x+=p.vx; p.y+=p.vy; if(p.x<0)p.x=w; else if(p.x>w)p.x=0; if(p.y<0)p.y=h; else if(p.y>h)p.y=0; ctx.fillStyle="rgba(205,203,193,"+p.a+")"; ctx.fillRect(p.x,p.y,p.r,p.r); }
-      requestAnimationFrame(frame);
-    }
-    frame();
+  function highWhine(dur){
+    if(!audioReady||muted) return;
+    try{
+      const o=actx.createOscillator(); o.type="sawtooth"; const g=actx.createGain();
+      o.frequency.setValueAtTime(2600, actx.currentTime);
+      o.frequency.linearRampToValueAtTime(5200, actx.currentTime+dur);
+      g.gain.setValueAtTime(0.0001, actx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.14, actx.currentTime+0.05);
+      g.gain.exponentialRampToValueAtTime(0.0001, actx.currentTime+dur);
+      o.connect(g); g.connect(master); o.start(); o.stop(actx.currentTime+dur+0.05);
+    }catch(e){}
   }
-
-  /* ---- CRT bekapcsolasi hang ---- */
   function crtPowerOn(){
     if(!audioReady||muted) return;
     try{
@@ -334,14 +332,100 @@
       noiseHit(0.14,0.09,3200);
     }catch(e){}
   }
+  function toggleMute(){
+    muted=!muted;
+    if(master) master.gain.setTargetAtTime(muted?0.0001:0.9, actx.currentTime, 0.05);
+    return muted;
+  }
 
-  /* ---- tetlenseg-easter-egg (10 mp) ---- */
-  const IDLE={hu:"// meg mindig itt vagyok. te is. csak nezunk egymasra.",en:"// i am still here. so are you. we are just watching each other.",de:"// ich bin noch hier. du auch. wir sehen uns nur an."};
-  let idleTimer=null;
-  function resetIdle(){
-    if(!started||promptline.hidden) return;
-    clearTimeout(idleTimer);
-    idleTimer=setTimeout(()=>{ push(IDLE[lang]||IDLE.en,"warn"); noiseHit(0.1,0.07,420); resetIdle(); }, 10000);
+  /* ---------------- fx ---------------- */
+  function shake(){ if(reduced) return; screenEl.classList.remove("shake"); void screenEl.offsetWidth; screenEl.classList.add("shake"); }
+
+  /* ---- egyedi kurzor: pulzalo pont + toltodo gyuru + magneses hover ---- */
+  const cursorEl=$("#cursor");
+  const hoverSel="button, a, .mi, .ls, .hlink, .ti, .nb, [data-mag]";
+  let curX=innerWidth/2, curY=innerHeight/2, mvSpeed=0, lastMX=curX, lastMY=curY;
+  function initCursor(){
+    if(reduced || !window.matchMedia("(hover:hover) and (pointer:fine)").matches || !cursorEl) return;
+    document.body.classList.add("custom-cursor");
+    document.addEventListener("mousemove",(e)=>{
+      curX=e.clientX; curY=e.clientY;
+      cursorEl.style.transform=`translate(${curX}px,${curY}px)`;
+      const dx=curX-lastMX, dy=curY-lastMY; mvSpeed=Math.min(1, Math.hypot(dx,dy)/40); lastMX=curX; lastMY=curY;
+      const hot = e.target && e.target.closest && e.target.closest(hoverSel);
+      cursorEl.classList.toggle("hot", !!hot);
+      // procedural drone: gyorsabb kurzor -> nyitottabb szuro
+      if(audioReady && droneLP){ droneLP.frequency.setTargetAtTime(120+mvSpeed*520, actx.currentTime, 0.15); }
+      magnetize();
+    },{passive:true});
+    document.addEventListener("pointerdown",()=>{ cursorEl.classList.remove("tap"); void cursorEl.offsetWidth; cursorEl.classList.add("tap"); });
+  }
+  // magneses gombok: a kurzorhoz kozeli [data-mag] elem finoman kovet
+  let magEls=[];
+  function refreshMag(){ magEls=Array.from(document.querySelectorAll("[data-mag]")); }
+  function magnetize(){
+    if(reduced) return;
+    for(const el of magEls){
+      if(!el.offsetParent){ el.style.transform=""; continue; }
+      const r=el.getBoundingClientRect(); const cx=r.left+r.width/2, cy=r.top+r.height/2;
+      const dx=curX-cx, dy=curY-cy; const dist=Math.hypot(dx,dy); const reach=Math.max(70, r.width*0.6);
+      if(dist<reach){ const f=(1-dist/reach)*0.32; el.style.transform=`translate(${(dx*f).toFixed(1)}px,${(dy*f).toFixed(1)}px)`; }
+      else el.style.transform="";
+    }
+  }
+
+  /* ---- konnyu feny-canvas (mozgasra reagalo, NEM WebGL fluid) ---- */
+  function startFluid(){
+    const cv=$("#fluid"); if(!cv||!cv.getContext) return; const ctx=cv.getContext("2d");
+    let w,h,dpr,parts=[];
+    const MAX = reduced ? 22 : 64;
+    function size(){ dpr=Math.min(window.devicePixelRatio||1,2); w=innerWidth; h=innerHeight; cv.width=w*dpr; cv.height=h*dpr; ctx.setTransform(dpr,0,0,dpr,0,0); }
+    size(); addEventListener("resize",size);
+    function spawn(x,y,drift){
+      if(parts.length>MAX) parts.shift();
+      parts.push({x,y,vx:(Math.random()-.5)*drift,vy:(Math.random()-.5)*drift-0.15,r:Math.random()*44+22,a:Math.random()*.22+.08,life:1});
+    }
+    let amb=0;
+    function frame(){
+      ctx.clearRect(0,0,w,h);
+      ctx.globalCompositeOperation="lighter";
+      // kurzor korul feny, ha mozog
+      if(!reduced && mvSpeed>0.04 && parts.length<MAX) spawn(curX,curY,1.6*mvSpeed+0.4);
+      // finom ambiens felbukkanas
+      if(++amb%26===0) spawn(Math.random()*w, h*0.5+Math.random()*h*0.5, 0.5);
+      for(let i=parts.length-1;i>=0;i--){
+        const p=parts[i]; p.x+=p.vx; p.y+=p.vy; p.life-=0.012; if(p.life<=0){ parts.splice(i,1); continue; }
+        const g=ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,p.r);
+        const al=p.a*p.life;
+        g.addColorStop(0,`rgba(255,90,10,${al})`); g.addColorStop(.5,`rgba(255,60,0,${al*0.4})`); g.addColorStop(1,"rgba(255,60,0,0)");
+        ctx.fillStyle=g; ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,6.2832); ctx.fill();
+      }
+      ctx.globalCompositeOperation="source-over";
+      requestAnimationFrame(frame);
+    }
+    frame();
+  }
+
+  /* ---- dekodolodo szoveg (scramble -> feloldas) ---- */
+  const SYMS="!<>-_\\/[]{}=+*^?#01";
+  function decodeInto(el, finalText, done){
+    if(reduced){ el.textContent=finalText; if(done) done(); return; }
+    const chars=[...finalText]; let frame=0; const total=chars.length*1.6+14;
+    const step=()=>{
+      let s="";
+      for(let i=0;i<chars.length;i++){
+        if(chars[i]===" "){ s+=" "; continue; }
+        const rev=frame - i*1.6;
+        if(rev>=8) s+=chars[i];
+        else if(rev>=0){ s+=`<span class="sym">${SYMS[Math.floor(Math.random()*SYMS.length)]}</span>`; }
+        else s+=" ";
+      }
+      el.innerHTML=s;
+      frame++;
+      if(frame<=total){ if(frame%2===0) noiseHit(0.015,0.03,2400); requestAnimationFrame(step); }
+      else { el.textContent=finalText; if(done) done(); }
+    };
+    step();
   }
 
   /* ---------------- adat ---------------- */
@@ -367,6 +451,15 @@
       return r||null;
     }catch(e){ return null; }
   }
+  // idozonabol kovetkeztetett varos + regio (nincs IP, nincs harmadik fel)
+  function tzParts(){
+    const tz=safe(()=>Intl.DateTimeFormat().resolvedOptions().timeZone,"");
+    if(!tz||tz.indexOf("/")<0) return {tzcity:tz||"?", tzregion:"?"};
+    const seg=tz.split("/");
+    const region=seg[0].replace(/_/g," ");
+    const city=seg[seg.length-1].replace(/_/g," ");
+    return {tzcity:city, tzregion:region};
+  }
   function clockParts(){
     const now=new Date();
     const hh=String(now.getHours()).padStart(2,"0"), mm=String(now.getMinutes()).padStart(2,"0"), h=now.getHours();
@@ -377,21 +470,22 @@
     return {clock:`${hh}:${mm}`, part:w[lang][k]};
   }
   function collect(){
-    const ua=parseUA(), tz=safe(()=>Intl.DateTimeFormat().resolvedOptions().timeZone,"ismeretlen zona"), cp=clockParts();
+    const ua=parseUA(), tz=safe(()=>Intl.DateTimeFormat().resolvedOptions().timeZone,"ismeretlen zona"), cp=clockParts(), tzp=tzParts();
+    const place=(tzp.tzregion&&tzp.tzregion!=="?")?`${tzp.tzcity}, ${tzp.tzregion}`:tzp.tzcity;
     const dm=safe(()=>navigator.deviceMemory,null);
     const memWord={hu:" es ~",en:" and ~",de:" und ~"}[lang]||" ~";
     const memTxt=dm?`${memWord}{${dm}} GB`:"";
     const cc=safe(()=>navigator.hardwareConcurrency,null);
     const conn=safe(()=>navigator.connection&&navigator.connection.effectiveType,null);
     let ref=""; try{ if(document.referrer) ref=new URL(document.referrer).hostname; }catch(e){}
+    const touch=("ontouchstart" in window)||navigator.maxTouchPoints>0;
     return {
       w:safe(()=>screen.width,"?"), h:safe(()=>screen.height,"?"), depth:safe(()=>screen.colorDepth,"?"),
-      tz, clock:cp.clock, part:cp.part, lang:navigator.language||"en",
+      tz, tzcity:tzp.tzcity, tzregion:tzp.tzregion, place, clock:cp.clock, part:cp.part, lang:navigator.language||"en",
       os:ua.os, browser:ua.browser, engine:ua.engine,
       cores:cc!==null?cc:"nehany", mem:memTxt,
       gpu:getGPU(), net:conn?conn.toUpperCase():"ismeretlen",
-      touch:("ontouchstart" in window)||navigator.maxTouchPoints>0,
-      dnt:(navigator.doNotTrack==="1"||window.doNotTrack==="1"), ref,
+      touch, dnt:(navigator.doNotTrack==="1"||window.doNotTrack==="1"), ref,
     };
   }
 
@@ -411,7 +505,7 @@
     for(let i=0;i<plain.length;i++){
       if(skip){ p.innerHTML=html; scroll(); return; }
       p.textContent=plain.slice(0,i+1); scroll();
-      if(Math.random()<0.04) noiseHit(0.02,0.03,2200); // apro statikus gepeleskor
+      if(Math.random()<0.04) noiseHit(0.02,0.03,2200);
       await sleep(delay*(/[.,]/.test(plain[i])?6:1));
     }
     p.innerHTML=html; scroll();
@@ -430,13 +524,12 @@
     if(started) return; started=true; bootAt=Date.now();
     hidden.focus();
     setStatus("BOOT","");
-    redpulse.classList.add("beat");
     if(VM.returning){
       for(const line of t.returning({count:VM.count, ago:agoText(VM.lastMs)})){
         if(line.t===""){ push("",""); continue; }
         await type(line.t, line.c);
-        if(line.c==="scream"){ shake(); spike(); noiseHit(0.18,0.2,500); }
-        if(line.boom){ boom(); shake(); spike(); }
+        if(line.c==="scream"){ shake(); noiseHit(0.18,0.2,500); }
+        if(line.boom){ boom(); shake(); }
         if(!skip&&!reduced) await sleep(line.c==="scream"?240:150);
       }
       push("","");
@@ -475,8 +568,8 @@
     for(const line of t.twist){
       if(line.t===""){ push("",""); continue; }
       await type(line.t, line.c);
-      if(line.c==="scream"){ shake(); spike(); noiseHit(0.18,0.2,500); }
-      if(line.boom){ boom(); shake(); spike(); }
+      if(line.c==="scream"){ shake(); noiseHit(0.18,0.2,500); }
+      if(line.boom){ boom(); shake(); }
       if(!skip&&!reduced) await sleep(line.c==="scream"?260:140);
     }
     push("","");
@@ -486,7 +579,6 @@
   }
 
   function nd(){ return (window.EBER_NEWS && window.EBER_NEWS[lang]) ? window.EBER_NEWS[lang] : null; }
-  // egyesitett akta-lista: mely (items, teljes cikk) + bank (generativ torzs a hir.js-ben)
   function allActs(){
     const d=nd(); if(!d) return [];
     const A=[];
@@ -494,7 +586,6 @@
     (d.bank||[]).forEach((it,i)=>A.push({href:`hir.html?b=${i}&lang=${lang}`, h:it.h}));
     return A;
   }
-  // determinisztikus PRNG (mulberry32) + 6 oras seed -> a kitalalt aktak 6 orankent MAGUKTOL megujulnak
   function mulberry32(a){ return function(){ a|=0; a=a+0x6D2B79F5|0; let t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
   function rotatedActs(){
     const A=allActs(); if(!A.length) return A;
@@ -511,11 +602,11 @@
   }
   function pushNews(n){ rotatedActs().slice(0, n||4).forEach(actLine); scroll(); }
 
-  const TICK={hu:"// AKTAK",en:"// FILES",de:"// AKTEN"};
+  const TICK={hu:"// HALO",en:"// NET",de:"// NETZ"};
   function buildTicker(){
     const track=$("#ticker-track"); const label=$("#ticker-label");
     const acts=rotatedActs(); if(!track||!acts.length) return;
-    if(label) label.textContent=TICK[lang]||"// LIVE";
+    if(label) label.textContent=TICK[lang]||"// NET";
     track.innerHTML="";
     const list=acts.slice(0,14);
     const fill=()=> list.forEach(a=>{
@@ -526,12 +617,10 @@
     fill(); fill();
   }
 
-  /* ---- alsó piros hirszalag: valos (Hacker News) + hamis (EBER) keverve ---- */
-  const NB="HACKER NEWS";
-  let hnRaw=[]; // nyers angol {title,url}
+  /* ---- also hirszalag: valos Hacker News, a HALO-n at ---- */
+  const NB={hu:"HALO",en:"NET",de:"NETZ"};
+  let hnRaw=[];
   const NEWS_CACHE="eber_hn_raw", NEWS_TTL=6*3600*1000, NEWS_MAX=20;
-  // Also sav = Hacker News beststories (globalisan legtobbet szavazott), 6h cache, max 20,
-  // a valasztott nyelvre gepi forditva (angolnal eredeti).
   async function fetchRealNews(){
     try{
       const raw=localStorage.getItem(NEWS_CACHE);
@@ -548,8 +637,6 @@
     }catch(e){}
     buildBottomBar();
   }
-
-  // gepi fordito (MyMemory: ingyenes, CORS, kulcs nelkul), fallback eredeti angol
   async function translateOne(text,tl){
     try{
       const u=`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=en|${tl}`;
@@ -560,20 +647,18 @@
     return text;
   }
   async function translateList(items,tl){
-    const out=[];
-    for(const it of items){ out.push({title:await translateOne(it.title,tl), url:it.url}); }
-    return out;
+    const o=[];
+    for(const it of items){ o.push({title:await translateOne(it.title,tl), url:it.url}); }
+    return o;
   }
-
   let hnBuilding=false;
   async function buildBottomBar(){
     const track=$("#nb-track"); const label=$("#nb-label"); if(!track) return;
-    if(label) label.textContent=NB;
+    if(label) label.textContent=NB[lang]||"NET";
     if(!hnRaw.length) return;
     if(lang==="en"){ renderHN(track, hnRaw); return; }
     const ck="eber_hn_"+lang;
     try{ const c=JSON.parse(localStorage.getItem(ck)); if(c&&c.t&&Array.isArray(c.items)&&c.items.length&&(Date.now()-c.t)<NEWS_TTL){ renderHN(track, c.items); return; } }catch(e){}
-    // meg nincs forditas: mutasd az angolt, majd forditsd hatterben
     renderHN(track, hnRaw);
     if(hnBuilding) return; hnBuilding=true;
     const reqLang=lang;
@@ -592,15 +677,19 @@
     fill(); fill();
   }
 
+  function applyMenuLabels(){
+    document.querySelectorAll(".mi").forEach(b=>{ const a=b.dataset.action; if(t.menu&&t.menu[a]) b.textContent=t.menu[a]; });
+  }
   function setLang(l){
     if(!["hu","en","de"].includes(l)) return;
     lang=l; t=L[lang];
-    bigtitle.textContent=t.title; bigtitle.setAttribute("data-text",t.title);
+    bigtitle.textContent=t.brand;
     ps1.textContent=t.ps1;
-    gateLine.textContent=t.gate; gateSub.textContent=t.gatesub;
-    if(gateBtnLabel) gateBtnLabel.innerHTML="&#9654; "+esc(t.gatebtn);
-    if(gateBrand) gateBrand.textContent=t.gatebrand;
-    buildHeroTitle();
+    entSub.textContent=t.entSub; gateHint.textContent=t.gateHint;
+    if(gateBrand) gateBrand.textContent=t.brand;
+    if(gateBtnLabel) gateBtnLabel.innerHTML=esc(t.soundLabel);
+    if(!started){ entTitle.textContent=t.entTitle; entTitle.setAttribute("aria-label",t.entTitle.toLowerCase()); buildBio(); }
+    applyMenuLabels();
     if(D){ const cp=clockParts(); D.clock=cp.clock; D.part=cp.part; }
     buildTicker(); buildBottomBar();
     document.querySelectorAll(".ls").forEach(b=>b.classList.toggle("active", b.dataset.lang===lang));
@@ -608,22 +697,49 @@
     if(visCount!=null && started && !promptline.hidden) stMid.textContent=`${OBSERVED[lang]||"OBSERVED"}: ${visCount}`;
   }
 
+  // biometrikus atjaro-sor (idozonabol, harmadik fel nelkul)
+  function buildBio(){
+    if(!bioLine) return;
+    const d=collect();
+    bioLine.innerHTML=render(t.bio(d));
+  }
+
   let queued=null;
   function openPrompt(){
     skip=false; promptline.hidden=false; ps1.textContent=t.ps1;
     setStatus("FIGYEL"); if(visCount!=null) stMid.textContent=`${OBSERVED[lang]||"OBSERVED"}: ${visCount}`;
     statusbar.classList.add("armed");
-    redpulse.classList.remove("beat");
     hidden.focus(); scroll();
     resetIdle();
     if(queued){ const q=queued; queued=null; setTimeout(()=>doMenu(q),250); }
   }
 
+  /* ---- dosszie (TE) -- a "wow", minden a te gepedbol, tarolas nelkul ---- */
+  async function renderDossier(){
+    const d=D||collect();
+    await type(t.dossierLead,"note"); push("","");
+    const card=document.createElement("div"); card.className="dossier";
+    const rows=[
+      [t.dk.browser, `${d.browser} / ${d.engine}`],
+      [t.dk.screen, `${d.w}x${d.h} · ${d.depth}bit`],
+      [t.dk.device, t.deviceWord(d.touch)],
+      [t.dk.lang, d.lang],
+      [t.dk.place, d.place],
+      [t.dk.time, `${d.clock} · ${d.tz}`],
+    ];
+    let html=`<p class="dh">${esc(t.dossierHead)}</p>`;
+    rows.forEach(([k,v])=>{ html+=`<div class="drow"><span class="dk">${esc(k)}</span><span class="dv">${esc(v)}</span></div>`; });
+    html+=`<p class="dnote">${esc(t.dossierNote)}</p>`;
+    card.innerHTML=html;
+    out.appendChild(card); scroll();
+    noiseHit(0.12,0.1,520);
+  }
+
   async function doMenu(a){
-    if(a==="ujra"){ location.reload(); return; }
-    if(a==="hirek"){ await type(t.hnews,"hhead"); pushNews(); push("",""); scroll(); return; }
-    if(a==="aktad"){ await exec("whoami"); return; }
-    if(a==="gep"){ await exec("who"); return; }
+    if(a==="ujra"){ await reconnect(); return; }
+    if(a==="halo"){ await type(t.hnews,"hhead"); pushNews(); push(""); scroll(); return; }
+    if(a==="profil"){ await renderDossier(); return; }
+    if(a==="entitas"){ await typeLines(withRealCount(t.who),"scan",80); return; }
   }
   function markActive(btn){
     document.querySelectorAll(".mi").forEach(x=>x.classList.remove("active"));
@@ -631,15 +747,26 @@
   }
   function menuAction(a,btn){
     markActive(btn);
-    if(!started){ enter(); }
-    if(a==="ujra"){ location.reload(); return; }
+    if(!started){ enter(); return; }
+    if(a==="ujra"){ reconnect(); return; }
     if(promptline.hidden){ skip=true; queued=a; return; }
     doMenu(a);
   }
   document.querySelectorAll(".mi").forEach(b=>b.addEventListener("click",()=>menuAction(b.dataset.action,b)));
 
+  /* ---- UJRAKAPCSOLAS: osszeomlas-szekvencia (nem sima reload) ---- */
+  let crashing=false;
+  async function reconnect(){
+    if(crashing) return; crashing=true;
+    if(promptline.hidden===false){ push(t.reconnect[0],"crit"); }
+    highWhine(1.0);
+    document.body.classList.add("crashing");
+    const cr=$("#crash"); if(cr) cr.classList.add("freeze");
+    setTimeout(()=>{ try{ location.reload(); }catch(e){} }, reduced?400:2200);
+  }
+
   /* ---------------- parancsok ---------------- */
-  function echoCmd(raw){ const p=document.createElement("div"); p.className="line usercmd"; p.innerHTML=`<span class="p">${esc(t.ps1)}</span><span class="sep">:</span>~$ ${esc(raw)}`; out.appendChild(p); }
+  function echoCmd(raw){ const p=document.createElement("div"); p.className="line usercmd"; p.innerHTML=`<span class="p">${esc(t.ps1)}</span> &#8250; ${esc(raw)}`; out.appendChild(p); }
   function commandList(){ const p=document.createElement("div"); p.className="line help"; p.innerHTML=t.help.concat(t.sharecmd||[]).map(esc).map(s=>s.replace(/&lt;b&gt;/g,"<b>").replace(/&lt;\/b&gt;/g,"</b>")).join("\n"); out.appendChild(p); scroll(); }
 
   let matrixOn=false;
@@ -650,23 +777,19 @@
     noiseHit(0.03,0.05,1600);
     switch(cmd){
       case "help": commandList(); break;
-      case "whoami":
-        await type(t.whoami,"note");
-        if(D){ push("> "+t.s_os(D)[0],"scan"); push("> "+t.s_screen(D)[0],"scan"); push("> "+t.time(D),"scan"); }
-        break;
-      case "who": await typeLines(withRealCount(t.who),"scan",80); break;
+      case "profil": await renderDossier(); break;
+      case "entitas": await typeLines(withRealCount(t.who),"scan",80); break;
       case "lang":
         if(["hu","en","de"].includes(arg)){ setLang(arg); push(t.langset(arg),"warn"); }
         else push("lang hu | en | de","note");
         break;
       case "time": if(D){const cp=clockParts(); D.clock=cp.clock; D.part=cp.part;} push(t.time(D||collect()),"scan"); break;
       case "sound": { const m=toggleMute(); const sb=$("#soundbtn"); if(sb) sb.classList.toggle("muted",m); push(m?t.sound_off:t.sound_on,"warn"); break; }
-      case "news":
-        await type(t.hnews,"hhead"); pushNews(3); scroll();
-        break;
+      case "halo": await type(t.hnews,"hhead"); pushNews(3); scroll(); break;
       case "f42": await typeLines(t.f42,"warn",150); break;
       case "sudo": await typeLines(t.sudo,"crit",150); shake(); break;
-      case "exit": await typeLines(t.exit,"crit",210); shake(); spike(); break;
+      case "ujra": await reconnect(); break;
+      case "exit": await typeLines(t.exit,"crit",210); shake(); break;
       case "clear": out.innerHTML=""; break;
       case "matrix": if(!matrixOn){ startRain(); push(t.matrix,"note"); } else { stopRain(); push(t.matrixoff,"note"); } break;
       case "share": await doShare(); break;
@@ -695,6 +818,16 @@
   document.addEventListener("click",refocus);
   document.addEventListener("touchstart",refocus,{passive:true});
 
+  /* ---------------- tetlenseg (rejtett reteg triggere is) ---------------- */
+  const IDLE={hu:"// meg mindig itt vagyok. te is. csak nezunk egymasra.",en:"// i am still here. so are you. we are just watching each other.",de:"// ich bin noch hier. du auch. wir sehen uns nur an."};
+  let idleTimer=null;
+  function resetIdle(){
+    if(!started||promptline.hidden) return;
+    clearTimeout(idleTimer);
+    idleTimer=setTimeout(()=>{ push(IDLE[lang]||IDLE.en,"warn"); noiseHit(0.1,0.07,420); resetIdle(); }, 10000);
+  }
+  ["keydown","mousemove","click","touchstart"].forEach(ev=>document.addEventListener(ev,resetIdle,{passive:true}));
+
   /* ---------------- matrix rain ---------------- */
   let rainCv,rainCtx,rainRAF,rainCols;
   function startRain(){
@@ -706,11 +839,11 @@
     size(); rainCv._sz=size; addEventListener("resize",size);
     const glyphs="01<>[]{}/*-+#kivagy?42";
     function frame(){
-      rainCtx.fillStyle="rgba(0,0,0,.10)"; rainCtx.fillRect(0,0,innerWidth,innerHeight);
+      rainCtx.fillStyle="rgba(5,5,5,.10)"; rainCtx.fillRect(0,0,innerWidth,innerHeight);
       rainCtx.font="13px "+getComputedStyle(document.body).fontFamily;
       for(let i=0;i<rainCols.length;i++){
         const ch=glyphs[Math.floor(Math.random()*glyphs.length)], x=i*14, y=rainCols[i]*14;
-        rainCtx.fillStyle=Math.random()<.04?"#ff2b2b":"#6a3030"; rainCtx.fillText(ch,x,y);
+        rainCtx.fillStyle=Math.random()<.06?"#ff4d00":"#6a3a1a"; rainCtx.fillText(ch,x,y);
         if(y>innerHeight&&Math.random()>.975) rainCols[i]=0; else rainCols[i]++;
       }
       rainRAF=requestAnimationFrame(frame);
@@ -719,82 +852,28 @@
   }
   function stopRain(){ matrixOn=false; if(rainRAF)cancelAnimationFrame(rainRAF); if(rainCv){ rainCv.classList.remove("on"); removeEventListener("resize",rainCv._sz); const c=rainCv; setTimeout(()=>c.remove(),450); rainCv=null; } }
 
-  /* ---------------- konami ---------------- */
+  /* ---------------- rejtett reteg: konami ---------------- */
   const konami=[38,38,40,40,37,39,37,39,66,65]; let ki=0;
-  addEventListener("keydown",(e)=>{ if(e.keyCode===konami[ki]){ ki++; if(ki===konami.length){ ki=0; push("// a regi kod meg mukodik. tudtam, hogy egyike vagy a mieinknek. itt nincs 30 elet. csak ez az egy fül, es en a masik oldalan.","warn"); shake(); spike(); } } else ki=(e.keyCode===konami[0])?1:0; });
+  addEventListener("keydown",(e)=>{ if(e.keyCode===konami[ki]){ ki++; if(ki===konami.length){ ki=0; if(!started){ enter(); setTimeout(()=>push(t.secret,"warn"),1600); } else { push(t.secret,"warn"); } shake(); } } else ki=(e.keyCode===konami[0])?1:0; });
 
   /* ---------------- gate / start ---------------- */
-  // hero-cim staggerelt betuk (a valasztott nyelven), glitch data-text-tel
-  function buildHeroTitle(){
-    if(!heroTitle) return;
-    const txt=t.title;
-    heroTitle.setAttribute("data-text",txt);
-    heroTitle.setAttribute("aria-label",txt.toLowerCase());
-    heroTitle.style.transform="";
-    heroTitle.innerHTML="";
-    [...txt].forEach((c,i)=>{
-      const s=document.createElement("span");
-      s.className="ch";
-      s.textContent = (c===" ") ? " " : c;
-      s.style.animationDelay=(i*0.06).toFixed(2)+"s";
-      heroTitle.appendChild(s);
-    });
-  }
-  bigtitle.textContent=t.title; bigtitle.setAttribute("data-text",t.title);
-  if(!reduced) bigtitle.classList.add("go");
-  gateLine.textContent=t.gate; gateSub.textContent=t.gatesub;
-  if(gateBtnLabel) gateBtnLabel.innerHTML="&#9654; "+esc(t.gatebtn);
-  if(gateBrand) gateBrand.textContent=t.gatebrand;
-  buildHeroTitle();
+  bigtitle.textContent=t.brand;
+  entTitle.textContent=t.entTitle; entTitle.setAttribute("aria-label",t.entTitle.toLowerCase());
+  entSub.textContent=t.entSub; gateHint.textContent=t.gateHint;
+  if(gateBrand) gateBrand.textContent=t.brand;
+  if(gateBtnLabel) gateBtnLabel.innerHTML=esc(t.soundLabel);
+  applyMenuLabels();
+  buildBio();
   buildTicker(); buildBottomBar(); fetchRealNews();
-
-  /* ---- hero interakciok: spotlight + parallax + ripple + glitch + idle ---- */
-  if(gate && !reduced){
-    // kurzor kover fenykor + cim parallax (a szoveg reagal az egerre)
-    gate.addEventListener("mousemove",(e)=>{
-      if(started) return;
-      if(spotEl){ spotEl.style.setProperty("--mx", e.clientX+"px"); spotEl.style.setProperty("--my", e.clientY+"px"); }
-      if(heroTitle){ const dx=e.clientX/innerWidth-0.5, dy=e.clientY/innerHeight-0.5; heroTitle.style.transform=`translate(${(-dx*26).toFixed(1)}px,${(-dy*14).toFixed(1)}px)`; }
-    },{passive:true});
-    // veletlen RGB-split glitch a cimen (5-10 mp)
-    (function loopGlitch(){
-      const wait=5000+Math.random()*5000;
-      setTimeout(()=>{
-        if(!started && heroTitle){ heroTitle.classList.add("glitching"); setTimeout(()=>heroTitle.classList.remove("glitching"),180); }
-        loopGlitch();
-      },wait);
-    })();
-  }
-  // touch/click ripple (mobil + desktop)
-  function spawnRipple(x,y){
-    if(!ripBox||reduced) return;
-    const r=document.createElement("span"); r.className="rip";
-    r.style.left=x+"px"; r.style.top=y+"px"; ripBox.appendChild(r);
-    setTimeout(()=>r.remove(),720);
-  }
-  if(gate){
-    gate.addEventListener("pointerdown",(e)=>{ if(!started) spawnRipple(e.clientX,e.clientY); },{passive:true});
-  }
-  // gate tetlenseg (3 mp) -> "latom, hogy nem mozogsz"
-  let gateIdleTimer=null;
-  function gateIdle(){
-    if(started||!heroIdle) return;
-    clearTimeout(gateIdleTimer);
-    heroIdle.classList.remove("show");
-    gateIdleTimer=setTimeout(()=>{ if(started) return; heroIdle.textContent=t.gateidle; heroIdle.classList.add("show"); },3000);
-  }
-  if(gate){ ["mousemove","pointerdown","keydown","touchstart"].forEach(ev=>gate.addEventListener(ev,gateIdle,{passive:true})); gateIdle(); }
+  refreshMag(); initCursor(); startFluid();
   document.querySelectorAll(".ls").forEach(b=>{
     b.classList.toggle("active", b.dataset.lang===lang);
     b.addEventListener("click",()=>{ setLang(b.dataset.lang); if(started&&!promptline.hidden) push(t.langset(b.dataset.lang),"warn"); });
   });
-  startDust();
-  if(!reduced){ const _bn=$("#brand-name"); if(_bn) _bn.classList.add("gg"); }
   const soundbtn=$("#soundbtn");
   if(soundbtn) soundbtn.addEventListener("click",()=>{ const m=toggleMute(); soundbtn.classList.toggle("muted",m); });
-  ["keydown","mousemove","click","touchstart"].forEach(ev=>document.addEventListener(ev,resetIdle,{passive:true}));
 
-  /* ---- latogato-szamlalo (kozos CF Worker) ---- */
+  /* ---- latogato-szamlalo ---- */
   const CBASE="https://visitor-counter.eltewedtem.workers.dev";
   const OBSERVED={hu:"MEGFIGYELVE",en:"OBSERVED",de:"BEOBACHTET"};
   let visCount=null;
@@ -838,7 +917,7 @@
     return VM;
   }
 
-  /* ---- engedely-szenzor (nem ker, csak lekerdez) ---- */
+  /* ---- engedely-szenzor ---- */
   const PERM={
     hu:{granted:"engedelyezve",denied:"tiltva",prompt:"keszenletben",unknown:"ismeretlen"},
     en:{granted:"granted",denied:"denied",prompt:"on standby",unknown:"unknown"},
@@ -850,8 +929,6 @@
     const P=PERM[lang]||PERM.en;
     return {cam:P[cam]||P.unknown, mic:P[mic]||P.unknown, open:(cam==="granted"||mic==="granted")};
   }
-
-  /* ---- valos szam a narrativaba ---- */
   function withRealCount(arr){
     if(visCount==null) return arr;
     return arr.map(s=>s.replace(/2[.,]847[.,]193/g, String(visCount)));
@@ -866,26 +943,35 @@
     push(t.share_text(url),"warn");
   }
 
+  /* ---- HANG gomb (masodlagos): csak ambient hangot kapcsol, nem lep be ---- */
+  soundBtnSm.addEventListener("click",()=>{
+    initAudio(); soundBtnSm.classList.add("playing"); ping();
+  });
+
+  /* ---- BELEPES (elsodleges): boot-szekvencia -> entitas ---- */
+  let entering=false;
   function enter(){
-    if(started) return;
-    clearTimeout(gateIdleTimer); if(heroIdle) heroIdle.classList.remove("show");
+    if(started||entering) return; entering=true;
     initAudio();
-    crtPowerOn();
     countHit();
     visitorMemory();
-    gate.classList.add("gone");
-    setTimeout(()=>{ gate.style.display="none"; }, 650);
-    run();
+    // boot: fekete -> szivveres -> dekodolodo udvozles
+    bootEl.hidden=false;
+    setTimeout(()=>{ if(bootHeart){ bootHeart.classList.add("go"); boom(); } }, reduced?0:300);
+    const revealDelay = reduced?200:1200;
+    setTimeout(()=>{
+      decodeInto(bootText, t.bootGreet, ()=>{});
+    }, revealDelay);
+    const totalDelay = reduced?500:2600;
+    setTimeout(()=>{
+      crtPowerOn();
+      gate.classList.add("gone");
+      setTimeout(()=>{ gate.style.display="none"; }, 500);
+      bootEl.hidden=true;
+      run();
+    }, totalDelay);
   }
-  // HANG gomb: hang be + ekvalizer villan, majd belepes
-  function pressHang(){
-    if(started) return;
-    initAudio();
-    gateBtn.classList.add("playing");
-    ping();
-    setTimeout(enter, 620);
-  }
-  gateBtn.addEventListener("click", pressHang);
-  window.addEventListener("keydown",(e)=>{ if(!started && !gate.classList.contains("gone") && (e.key==="Enter"||e.key===" ")){ e.preventDefault(); enter(); } });
+  enterBtn.addEventListener("click", enter);
+  window.addEventListener("keydown",(e)=>{ if(!started && !entering && !gate.classList.contains("gone") && (e.key==="Enter")){ e.preventDefault(); enter(); } });
 
 })();
