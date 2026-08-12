@@ -17,6 +17,9 @@
   const statusbar = $("#statusbar");
   const redpulse = $("#redpulse");
   const gate = $("#gate"), gateBtn = $("#gate-btn"), gateLine = $("#gate-line"), gateSub = $("#gate-sub");
+  const gateBtnLabel = $("#gate-btn-label"), gateBrand = $("#gate-brand");
+  const heroTitle = $("#hero-title"), heroIdle = $("#hero-idle");
+  const spotEl = $("#spotlight"), ripBox = $("#ripplebox");
 
   const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -24,7 +27,8 @@
   const L = {
     hu: {
       title:"KI VAGY?", ps1:"te@megjelolt",
-      gate:"valaki figyel a sotetbol.", gatebtn:"[ lepj be ]", gatesub:"hang ajanlott. egyedul ajanlott.",
+      gate:"valaki figyel a sotetbol.", gatebtn:"HANG BEKAPCSOLASA", gatesub:"egyedul ajanlott.",
+      gatebrand:"megfigyelo terminal", gateidle:"latom, hogy nem mozogsz. en meg mindig itt vagyok.",
       boot:["nem aludtam. rad vartam.","erzekelok elesitve . . .","cel bemerve . . .","latlak."],
       scanhead:"// beolvaslak. ne mozdulj, ugy is latlak.",
       s_screen:(d)=>[`a kijelzod {${d.w}}x{${d.h}}, {${d.depth}} bit. latom rajta magad.`,"es latom, hogy egyedul vagy."],
@@ -85,7 +89,8 @@
     },
     en: {
       title:"WHO ARE YOU?", ps1:"you@flagged",
-      gate:"someone is watching from the dark.", gatebtn:"[ enter ]", gatesub:"sound recommended. alone recommended.",
+      gate:"someone is watching from the dark.", gatebtn:"ENABLE SOUND", gatesub:"alone recommended.",
+      gatebrand:"surveillance terminal", gateidle:"i see you are not moving. i am still here.",
       boot:["i did not sleep. i waited for you.","arming sensors . . .","target acquired . . .","i see you."],
       scanhead:"// reading you now. do not move, i see you anyway.",
       s_screen:(d)=>[`your display is {${d.w}}x{${d.h}}, {${d.depth}}-bit. i see yourself on it.`,"and i see that you are alone."],
@@ -146,7 +151,8 @@
     },
     de: {
       title:"WER BIST DU?", ps1:"du@markiert",
-      gate:"jemand beobachtet aus dem dunkeln.", gatebtn:"[ eintreten ]", gatesub:"ton empfohlen. allein empfohlen.",
+      gate:"jemand beobachtet aus dem dunkeln.", gatebtn:"TON EINSCHALTEN", gatesub:"allein empfohlen.",
+      gatebrand:"ueberwachungs-terminal", gateidle:"ich sehe, du bewegst dich nicht. ich bin noch hier.",
       boot:["ich habe nicht geschlafen. ich habe auf dich gewartet.","sensoren werden scharf . . .","ziel erfasst . . .","ich sehe dich."],
       scanhead:"// ich lese dich jetzt. beweg dich nicht, ich sehe dich ohnehin.",
       s_screen:(d)=>[`dein bildschirm ist {${d.w}}x{${d.h}}, {${d.depth}}-bit. ich sehe dich darauf.`,"und ich sehe, dass du allein bist."],
@@ -281,6 +287,18 @@
     muted=!muted;
     if(master) master.gain.setTargetAtTime(muted?0.0001:0.9, actx.currentTime, 0.05);
     return muted;
+  }
+  function ping(){
+    if(!audioReady||muted) return;
+    try{
+      const o=actx.createOscillator(); o.type="triangle"; const g=actx.createGain();
+      o.frequency.setValueAtTime(760, actx.currentTime);
+      o.frequency.exponentialRampToValueAtTime(1720, actx.currentTime+0.09);
+      g.gain.setValueAtTime(0.0001, actx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.26, actx.currentTime+0.01);
+      g.gain.exponentialRampToValueAtTime(0.0001, actx.currentTime+0.24);
+      o.connect(g); g.connect(master); o.start(); o.stop(actx.currentTime+0.28);
+    }catch(e){}
   }
 
   /* ---------------- fx ---------------- */
@@ -579,7 +597,10 @@
     lang=l; t=L[lang];
     bigtitle.textContent=t.title; bigtitle.setAttribute("data-text",t.title);
     ps1.textContent=t.ps1;
-    gateLine.textContent=t.gate; gateBtn.textContent=t.gatebtn; gateSub.textContent=t.gatesub;
+    gateLine.textContent=t.gate; gateSub.textContent=t.gatesub;
+    if(gateBtnLabel) gateBtnLabel.innerHTML="&#9654; "+esc(t.gatebtn);
+    if(gateBrand) gateBrand.textContent=t.gatebrand;
+    buildHeroTitle();
     if(D){ const cp=clockParts(); D.clock=cp.clock; D.part=cp.part; }
     buildTicker(); buildBottomBar();
     document.querySelectorAll(".ls").forEach(b=>b.classList.toggle("active", b.dataset.lang===lang));
@@ -703,10 +724,66 @@
   addEventListener("keydown",(e)=>{ if(e.keyCode===konami[ki]){ ki++; if(ki===konami.length){ ki=0; push("// a regi kod meg mukodik. tudtam, hogy egyike vagy a mieinknek. itt nincs 30 elet. csak ez az egy fül, es en a masik oldalan.","warn"); shake(); spike(); } } else ki=(e.keyCode===konami[0])?1:0; });
 
   /* ---------------- gate / start ---------------- */
+  // hero-cim staggerelt betuk (a valasztott nyelven), glitch data-text-tel
+  function buildHeroTitle(){
+    if(!heroTitle) return;
+    const txt=t.title;
+    heroTitle.setAttribute("data-text",txt);
+    heroTitle.setAttribute("aria-label",txt.toLowerCase());
+    heroTitle.style.transform="";
+    heroTitle.innerHTML="";
+    [...txt].forEach((c,i)=>{
+      const s=document.createElement("span");
+      s.className="ch";
+      s.textContent = (c===" ") ? " " : c;
+      s.style.animationDelay=(i*0.06).toFixed(2)+"s";
+      heroTitle.appendChild(s);
+    });
+  }
   bigtitle.textContent=t.title; bigtitle.setAttribute("data-text",t.title);
   if(!reduced) bigtitle.classList.add("go");
-  gateLine.textContent=t.gate; gateBtn.textContent=t.gatebtn; gateSub.textContent=t.gatesub;
+  gateLine.textContent=t.gate; gateSub.textContent=t.gatesub;
+  if(gateBtnLabel) gateBtnLabel.innerHTML="&#9654; "+esc(t.gatebtn);
+  if(gateBrand) gateBrand.textContent=t.gatebrand;
+  buildHeroTitle();
   buildTicker(); buildBottomBar(); fetchRealNews();
+
+  /* ---- hero interakciok: spotlight + parallax + ripple + glitch + idle ---- */
+  if(gate && !reduced){
+    // kurzor kover fenykor + cim parallax (a szoveg reagal az egerre)
+    gate.addEventListener("mousemove",(e)=>{
+      if(started) return;
+      if(spotEl){ spotEl.style.setProperty("--mx", e.clientX+"px"); spotEl.style.setProperty("--my", e.clientY+"px"); }
+      if(heroTitle){ const dx=e.clientX/innerWidth-0.5, dy=e.clientY/innerHeight-0.5; heroTitle.style.transform=`translate(${(-dx*26).toFixed(1)}px,${(-dy*14).toFixed(1)}px)`; }
+    },{passive:true});
+    // veletlen RGB-split glitch a cimen (5-10 mp)
+    (function loopGlitch(){
+      const wait=5000+Math.random()*5000;
+      setTimeout(()=>{
+        if(!started && heroTitle){ heroTitle.classList.add("glitching"); setTimeout(()=>heroTitle.classList.remove("glitching"),180); }
+        loopGlitch();
+      },wait);
+    })();
+  }
+  // touch/click ripple (mobil + desktop)
+  function spawnRipple(x,y){
+    if(!ripBox||reduced) return;
+    const r=document.createElement("span"); r.className="rip";
+    r.style.left=x+"px"; r.style.top=y+"px"; ripBox.appendChild(r);
+    setTimeout(()=>r.remove(),720);
+  }
+  if(gate){
+    gate.addEventListener("pointerdown",(e)=>{ if(!started) spawnRipple(e.clientX,e.clientY); },{passive:true});
+  }
+  // gate tetlenseg (3 mp) -> "latom, hogy nem mozogsz"
+  let gateIdleTimer=null;
+  function gateIdle(){
+    if(started||!heroIdle) return;
+    clearTimeout(gateIdleTimer);
+    heroIdle.classList.remove("show");
+    gateIdleTimer=setTimeout(()=>{ if(started) return; heroIdle.textContent=t.gateidle; heroIdle.classList.add("show"); },3000);
+  }
+  if(gate){ ["mousemove","pointerdown","keydown","touchstart"].forEach(ev=>gate.addEventListener(ev,gateIdle,{passive:true})); gateIdle(); }
   document.querySelectorAll(".ls").forEach(b=>{
     b.classList.toggle("active", b.dataset.lang===lang);
     b.addEventListener("click",()=>{ setLang(b.dataset.lang); if(started&&!promptline.hidden) push(t.langset(b.dataset.lang),"warn"); });
@@ -791,6 +868,7 @@
 
   function enter(){
     if(started) return;
+    clearTimeout(gateIdleTimer); if(heroIdle) heroIdle.classList.remove("show");
     initAudio();
     crtPowerOn();
     countHit();
@@ -799,7 +877,15 @@
     setTimeout(()=>{ gate.style.display="none"; }, 650);
     run();
   }
-  gateBtn.addEventListener("click", enter);
+  // HANG gomb: hang be + ekvalizer villan, majd belepes
+  function pressHang(){
+    if(started) return;
+    initAudio();
+    gateBtn.classList.add("playing");
+    ping();
+    setTimeout(enter, 620);
+  }
+  gateBtn.addEventListener("click", pressHang);
   window.addEventListener("keydown",(e)=>{ if(!started && !gate.classList.contains("gone") && (e.key==="Enter"||e.key===" ")){ e.preventDefault(); enter(); } });
 
 })();

@@ -4,13 +4,20 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>ki vagy?</title>
-<meta name="description" content="EBER megfigyelo terminal. Valos idoben kiolvassa a gepedbol, ki vagy. Nincs szerver, nincs naplo, es megsem tudsz elrejtozni.">
+<meta name="description" content="Ki vagy? Egy elo, dühös, reagalo szervezet, ami megtamad a kepernyon keresztul. Neon, glitch, valos ideju megfigyeles.">
 <meta name="color-scheme" content="dark">
-<meta name="theme-color" content="#000000">
-<meta property="og:title" content="ki vagy? // EBER">
-<meta property="og:description" content="Valaki figyel a sotetbol. Kiolvas a gepedbol, es megmondja, mit lat. Lepj be, ha mered.">
+<meta name="theme-color" content="#0a0a0f">
+<meta property="og:title" content="KI VAGY?">
+<meta property="og:description" content="Egy elo szervezet a kepernyo masik oldalan. Megtamad, mielott megszolalnal. Lepj be, ha mered.">
 <meta property="og:type" content="website">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23000'/%3E%3Ccircle cx='50' cy='50' r='30' fill='none' stroke='%23ff2b2b' stroke-width='7'/%3E%3Ccircle cx='50' cy='50' r='10' fill='%23ff2b2b'/%3E%3C/svg%3E">
+<meta property="og:image" content="https://hanskulo.github.io/ki-vagy/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%230a0a0f'/%3E%3Ccircle cx='50' cy='50' r='30' fill='none' stroke='%2300f0ff' stroke-width='7'/%3E%3Ccircle cx='50' cy='50' r='10' fill='%23ff006e'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -22,12 +29,20 @@
 <div id="redpulse" class="redpulse" aria-hidden="true"></div>
 
 <div id="gate" class="gate">
-  <div class="gate-inner">
-    <p class="gate-eye" aria-hidden="true">&#9673;</p>
-    <p class="gate-brand" id="gate-brand">EBER // megfigyelo terminal</p>
-    <p class="gate-line" id="gate-line">valaki figyel a sotetbol.</p>
-    <button id="gate-btn" class="gate-btn" type="button">[ lepj be ]</button>
-    <p class="gate-sub" id="gate-sub">hang ajanlott. egyedul ajanlott.</p>
+  <div class="mesh" aria-hidden="true"><span class="blob b1"></span><span class="blob b2"></span><span class="blob b3"></span></div>
+  <div class="grain" aria-hidden="true"></div>
+  <div id="spotlight" class="spotlight" aria-hidden="true"></div>
+  <div id="ripplebox" class="ripplebox" aria-hidden="true"></div>
+  <div class="hero">
+    <p class="hero-top"><span class="livedot" id="livedot"></span><span id="gate-brand">megfigyelo terminal</span></p>
+    <h1 class="hero-title glitch-hero" id="hero-title" data-text="KI VAGY?" aria-label="ki vagy?"></h1>
+    <p class="hero-line" id="gate-line">valaki figyel a sotetbol.</p>
+    <p class="hero-idle" id="hero-idle" aria-hidden="true"></p>
+    <button id="gate-btn" class="hang-btn" type="button">
+      <span class="hang-label" id="gate-btn-label">&#9654; HANG BEKAPCSOLASA</span>
+      <span class="eq" id="eq" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+    </button>
+    <p class="hero-sub" id="gate-sub">egyedul ajanlott.</p>
   </div>
 </div>
 
@@ -61,7 +76,7 @@
   <input id="hiddeninput" class="hiddeninput" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" aria-label="parancs bevitele" />
 </main>
 
-<script src="news-data.js?v=9"></script>
+<script src="news-data.js?v=10"></script>
 
 <div id="newsbar" class="newsbar">
   <span class="nb-label" id="nb-label">HIRHALO</span>
@@ -74,6 +89,6 @@
   <span id="st-right">--:--:--</span>
 </footer>
 
-<script src="app.js?v=9"></script>
+<script src="app.js?v=10"></script>
 </body>
 </html>
