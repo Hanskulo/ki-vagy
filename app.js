@@ -246,7 +246,11 @@
 
   let lang = pickLang();
   let t = L[lang];
-  function pickLang(){ const n=(navigator.language||"en").toLowerCase(); if(n.startsWith("hu"))return"hu"; if(n.startsWith("de"))return"de"; return"en"; }
+  function pickLang(){
+    const list=(navigator.languages&&navigator.languages.length)?navigator.languages:[navigator.language||"en"];
+    for(const L of list){ const n=String(L||"").toLowerCase(); if(n.startsWith("hu"))return"hu"; if(n.startsWith("de"))return"de"; if(n.startsWith("en"))return"en"; }
+    return "en";
+  }
 
   /* ---------------- audio ---------------- */
   let actx=null, droneGain=null, droneLP=null, master=null, muted=false, audioReady=false;
@@ -578,51 +582,52 @@
     openPrompt();
   }
 
-  /* ---- felso szalag: VALOS vilaghirek (Wikipedia "In the news", kulcs nelkul, CORS) ----
-     Forras: en.wikipedia.org/api/rest_v1/feed/featured -> news (ITN) + mostread.
-     A valasztott nyelvre gepi forditva (angolnal eredeti), 1 oras cache. */
+  /* ---- felso szalag: VALOS hirek A LATOGATO NYELVEN, natívan (nincs flaky forditas) ----
+     Forras: {lang}.wikipedia.org featured feed -> news (In the news) + mostread.
+     Igy a hirek MINDIG a megjelenitett nyelven vannak. Vegso mentsvar: en + forditas. */
   const TICK={hu:"// VILAG",en:"// WORLD",de:"// WELT"};
-  const ITN_CACHE="eber_itn_raw", ITN_TTL=60*60*1000, ITN_MAX=18;
-  let itnRaw=[];
+  const ITN_TTL=60*60*1000, ITN_MAX=18;
+  const CURRENTS={hu:"https://hu.wikipedia.org/wiki/Port%C3%A1l:Friss_h%C3%ADrek",en:"https://en.wikipedia.org/wiki/Portal:Current_events",de:"https://de.wikipedia.org/wiki/Portal:Nachrichten"};
+  let topShown=[];
   function itnDateParts(off){ const d=new Date(Date.now()-off*86400000); return `${d.getUTCFullYear()}/${String(d.getUTCMonth()+1).padStart(2,"0")}/${String(d.getUTCDate()).padStart(2,"0")}`; }
+  // tageket strippel + HTML-entitasokat dekodol (natívan) + lágy elválasztójel ki
+  function cleanText(html){ const d=document.createElement("div"); d.innerHTML=String(html||""); return (d.textContent||"").replace(/[­​]/g,"").replace(/_/g," ").replace(/\s+/g," ").trim(); }
+  function extractItems(j, fallbackUrl){
+    const items=[];
+    (Array.isArray(j.news)?j.news:[]).forEach(n=>{
+      const title=cleanText(n.story);
+      let url=fallbackUrl;
+      const lk=(n.links||[]).find(x=>x&&x.content_urls&&x.content_urls.desktop&&x.content_urls.desktop.page);
+      if(lk) url=lk.content_urls.desktop.page;
+      if(title) items.push({title, url});
+    });
+    if(j.mostread && Array.isArray(j.mostread.articles)){
+      j.mostread.articles.forEach(a=>{ if(items.length<ITN_MAX && a && a.content_urls && a.content_urls.desktop){ const ti=(a.titles&&(a.titles.normalized||a.titles.canonical))||a.title||""; const ct=cleanText(ti); if(ct) items.push({title:ct, url:a.content_urls.desktop.page}); } });
+    }
+    return items.slice(0,ITN_MAX);
+  }
   async function fetchTopNews(){
-    try{ const raw=localStorage.getItem(ITN_CACHE); if(raw){ const c=JSON.parse(raw); if(c&&c.t&&Array.isArray(c.items)&&c.items.length&&(Date.now()-c.t)<ITN_TTL){ itnRaw=c.items.slice(0,ITN_MAX); buildTopBar(); return; } } }catch(e){}
-    for(let off=0; off<2; off++){
+    const reqLang=lang;
+    try{ const raw=localStorage.getItem("eber_itn_"+reqLang); if(raw){ const c=JSON.parse(raw); if(c&&c.t&&Array.isArray(c.items)&&c.items.length&&(Date.now()-c.t)<ITN_TTL){ if(reqLang===lang) renderTop(c.items); return; } } }catch(e){}
+    const host=reqLang+".wikipedia.org", fb=CURRENTS[reqLang]||CURRENTS.en;
+    let items=[];
+    for(let off=0; off<2 && !items.length; off++){
       try{
         const ctrl=new AbortController(); const to=setTimeout(()=>ctrl.abort(),8000);
-        const r=await fetch(`https://en.wikipedia.org/api/rest_v1/feed/featured/${itnDateParts(off)}`,{signal:ctrl.signal, headers:{"Api-User-Agent":"ki-vagy (github.com/Hanskulo/ki-vagy)"}});
+        const r=await fetch(`https://${host}/api/rest_v1/feed/featured/${itnDateParts(off)}`,{signal:ctrl.signal, headers:{"Api-User-Agent":"ki-vagy (github.com/Hanskulo/ki-vagy)"}});
         clearTimeout(to);
-        if(!r.ok) continue;
-        const j=await r.json();
-        const items=[];
-        (Array.isArray(j.news)?j.news:[]).forEach(n=>{
-          const title=String(n.story||"").replace(/<[^>]+>/g," ").replace(/\s+/g," ").trim();
-          let url="https://en.wikipedia.org/wiki/Portal:Current_events";
-          const lk=(n.links||[]).find(x=>x&&x.content_urls&&x.content_urls.desktop&&x.content_urls.desktop.page);
-          if(lk) url=lk.content_urls.desktop.page;
-          if(title) items.push({title, url});
-        });
-        if(j.mostread && Array.isArray(j.mostread.articles)){
-          j.mostread.articles.forEach(a=>{ if(items.length<ITN_MAX && a && a.content_urls && a.content_urls.desktop){ const ti=(a.titles&&(a.titles.normalized||a.titles.canonical))||a.title||""; if(ti) items.push({title:String(ti).replace(/_/g," "), url:a.content_urls.desktop.page}); } });
-        }
-        if(items.length){ itnRaw=items.slice(0,ITN_MAX); try{ localStorage.setItem(ITN_CACHE, JSON.stringify({t:Date.now(), items:itnRaw})); }catch(e){} break; }
+        if(r.ok) items=extractItems(await r.json(), fb);
       }catch(e){}
     }
-    buildTopBar();
+    // ha a nyelvi wiki ures (ritka kis wiki), en ITN + gepi forditas mint vegso mentsvar
+    if(!items.length && reqLang!=="en"){
+      try{ const r=await fetch(`https://en.wikipedia.org/api/rest_v1/feed/featured/${itnDateParts(0)}`,{headers:{"Api-User-Agent":"ki-vagy (github.com/Hanskulo/ki-vagy)"}});
+        if(r.ok){ const en=extractItems(await r.json(), CURRENTS.en); items=await translateList(en, reqLang); } }catch(e){}
+    }
+    if(items.length){ try{ localStorage.setItem("eber_itn_"+reqLang, JSON.stringify({t:Date.now(), items})); }catch(e){} }
+    if(reqLang===lang) renderTop(items);
   }
-  let itnBuilding=false;
-  async function buildTopBar(){
-    if(!itnRaw.length){ renderTop([]); return; }
-    if(lang==="en"){ renderTop(itnRaw); return; }
-    const ck="eber_itn_"+lang;
-    try{ const c=JSON.parse(localStorage.getItem(ck)); if(c&&c.t&&Array.isArray(c.items)&&c.items.length&&(Date.now()-c.t)<ITN_TTL){ renderTop(c.items); return; } }catch(e){}
-    renderTop(itnRaw);
-    if(itnBuilding) return; itnBuilding=true; const reqLang=lang;
-    const tr=await translateList(itnRaw, reqLang); itnBuilding=false;
-    try{ localStorage.setItem("eber_itn_"+reqLang, JSON.stringify({t:Date.now(), items:tr})); }catch(e){}
-    if(reqLang===lang) renderTop(tr);
-  }
-  let topShown=[];
+  function buildTopBar(){ fetchTopNews(); }
   function renderTop(items){
     topShown=items||[];
     const track=$("#ticker-track"); const label=$("#ticker-label");
@@ -639,7 +644,7 @@
   }
   function buildTicker(){ buildTopBar(); }
   function pushNews(n){
-    const items=(topShown&&topShown.length)?topShown:itnRaw;
+    const items=(topShown&&topShown.length)?topShown:[];
     items.slice(0, n||6).forEach(m=>{
       const p=document.createElement("div"); p.className="line hitem";
       const a=document.createElement("a"); a.className="hlink"; a.href=m.url; a.target="_blank"; a.rel="noopener noreferrer"; a.textContent=m.title;
@@ -670,7 +675,7 @@
   }
   async function translateOne(text,tl){
     try{
-      const u=`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=en|${tl}`;
+      const u=`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=en|${tl}&de=eber.kivagy@gmail.com`;
       const r=await fetch(u); if(!r.ok) return text;
       const j=await r.json(); const tt=j&&j.responseData&&j.responseData.translatedText;
       if(tt && !/MYMEMORY|INVALID|QUERY LENGTH|LIMIT|USAGE/i.test(tt)) return tt;
@@ -894,6 +899,7 @@
   if(gateBrand) gateBrand.textContent=t.brand;
   if(gateBtnLabel) gateBtnLabel.innerHTML=esc(t.soundLabel);
   applyMenuLabels();
+  document.documentElement.lang=lang;
   buildBio();
   buildBottomBar(); fetchRealNews(); fetchTopNews();
   refreshMag(); initCursor(); startFluid();
