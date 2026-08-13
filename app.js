@@ -19,6 +19,7 @@
   const gate = $("#gate"), enterBtn = $("#enter-btn"), soundBtnSm = $("#gate-btn");
   const gateBtnLabel = $("#gate-btn-label"), gateBrand = $("#gate-brand");
   const entTitle = $("#ent-title"), entSub = $("#ent-sub"), bioLine = $("#bio-line"), gateHint = $("#gate-hint");
+  const doorsEl = $("#doors"), doorsHintEl = $("#doors-hint");
   const bootEl = $("#boot"), bootHeart = $("#boot-heart"), bootText = $("#boot-text");
 
   const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -30,6 +31,9 @@
       enterLabel:"BELEPES", soundLabel:"▶ hang", gateHint:"egyedul ajanlott.",
       brand:"EBER",
       menu:{profil:"TE", halo:"HALO", entitas:"EN", ujra:"UJRAKAPCSOLAS"},
+      doorsHint:"valassz egy ajtot. mind hozzam vezet.",
+      doorSame:(c)=>`ugyanazon az ajton jottel be, mint multkor: {${c}}. a szokas is egy zar.`,
+      doorDiff:(p,c)=>`multkor a {${p}} ajton jottel. most a {${c}}. ugyanoda ersz.`,
       // biometrikus atjaro: idozonabol kovetkeztetett varos + OS + felbontas + ido
       bio:(d)=>`latom. a geped a {${d.tzcity}} idozonat futtatja. tehat innen figyellek: {${d.place}}. nalad {${d.clock}} van. {${d.os}}, {${d.w}}x{${d.h}}. regi ismeros.`,
       bootGreet:"belepsz. mostantol latlak.",
@@ -97,6 +101,9 @@
       enterLabel:"ENTER", soundLabel:"▶ sound", gateHint:"alone recommended.",
       brand:"EBER",
       menu:{profil:"YOU", halo:"NET", entitas:"ME", ujra:"RECONNECT"},
+      doorsHint:"choose a door. all of them lead to me.",
+      doorSame:(c)=>`you came through the same door as last time: {${c}}. habit is a lock too.`,
+      doorDiff:(p,c)=>`last time you came through {${p}}. now {${c}}. it leads to the same place.`,
       bio:(d)=>`i see you. your machine runs the {${d.tzcity}} time zone. so i watch from here: {${d.place}}. it is {${d.clock}} where you are. {${d.os}}, {${d.w}}x{${d.h}}. an old acquaintance.`,
       bootGreet:"you are entering. from now on i see you.",
       boot:["i did not sleep. i waited for you.","arming sensors","target acquired","i see you."],
@@ -163,6 +170,9 @@
       enterLabel:"EINTRETEN", soundLabel:"▶ ton", gateHint:"allein empfohlen.",
       brand:"EBER",
       menu:{profil:"DU", halo:"NETZ", entitas:"ICH", ujra:"NEUSTART"},
+      doorsHint:"waehle eine tuer. alle fuehren zu mir.",
+      doorSame:(c)=>`du kamst durch dieselbe tuer wie letztes mal: {${c}}. gewohnheit ist auch ein schloss.`,
+      doorDiff:(p,c)=>`letztes mal kamst du durch {${p}}. jetzt {${c}}. es fuehrt zum selben ort.`,
       bio:(d)=>`ich sehe dich. dein geraet laeuft in der zeitzone {${d.tzcity}}. also beobachte ich von hier: {${d.place}}. bei dir ist es {${d.clock}}. {${d.os}}, {${d.w}}x{${d.h}}. ein alter bekannter.`,
       bootGreet:"du trittst ein. ab jetzt sehe ich dich.",
       boot:["ich habe nicht geschlafen. ich habe auf dich gewartet.","sensoren werden scharf","ziel erfasst","ich sehe dich."],
@@ -309,6 +319,23 @@
       g.gain.exponentialRampToValueAtTime(0.2, actx.currentTime+0.01);
       g.gain.exponentialRampToValueAtTime(0.0001, actx.currentTime+0.2);
       o.connect(g); g.connect(master); o.start(); o.stop(actx.currentTime+0.24);
+    }catch(e){}
+  }
+  // ajto-nyikorgas: ajtonkent mas hangszin (config tone), majd tompa dobbanas a fenybetoltesre
+  function creak(tone){
+    if(!audioReady||muted) return;
+    try{
+      const f=(tone&&tone.f)||300, dur=(tone&&tone.dur)||0.6, ty=(tone&&tone.type)||"sawtooth";
+      const o=actx.createOscillator(); o.type=ty; const g=actx.createGain();
+      o.frequency.setValueAtTime(f*1.7, actx.currentTime);
+      o.frequency.exponentialRampToValueAtTime(Math.max(38,f*0.5), actx.currentTime+dur);
+      const bp=actx.createBiquadFilter(); bp.type="bandpass"; bp.frequency.value=f; bp.Q.value=7;
+      g.gain.setValueAtTime(0.0001, actx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.15, actx.currentTime+0.05);
+      g.gain.exponentialRampToValueAtTime(0.0001, actx.currentTime+dur);
+      o.connect(bp); bp.connect(g); g.connect(master); o.start(); o.stop(actx.currentTime+dur+0.05);
+      noiseHit(dur*0.8, 0.06, f*3);
+      setTimeout(()=>{ boom(); }, Math.round(dur*700));
     }catch(e){}
   }
   function highWhine(dur){
@@ -536,6 +563,9 @@
         if(line.boom){ boom(); shake(); }
         if(!skip&&!reduced) await sleep(line.c==="scream"?240:150);
       }
+      if(prevDoor && chosenDoor){
+        await type(prevDoor===chosenDoor ? t.doorSame(doorName(chosenDoor)) : t.doorDiff(doorName(prevDoor), doorName(chosenDoor)), "warn");
+      }
       push("","");
     }
     const NIGHT={hu:"// hajnali 3 fele jarsz. tudod, mit jelent ilyenkor ebren lenni. en tudom.",en:"// it is the small hours where you are. you know what it means to be awake now. i do.",de:"// es ist tief in der nacht bei dir. du weisst, was es heisst, jetzt wach zu sein. ich weiss es."};
@@ -724,7 +754,7 @@
     entSub.textContent=t.entSub; gateHint.textContent=t.gateHint;
     if(gateBrand) gateBrand.textContent=t.brand;
     if(gateBtnLabel) gateBtnLabel.innerHTML=esc(t.soundLabel);
-    if(!started){ entTitle.textContent=t.entTitle; entTitle.setAttribute("aria-label",t.entTitle.toLowerCase()); buildBio(); }
+    if(!started){ entTitle.textContent=t.entTitle; entTitle.setAttribute("aria-label",t.entTitle.toLowerCase()); buildBio(); relabelDoors(); }
     applyMenuLabels();
     if(D){ const cp=clockParts(); D.clock=cp.clock; D.part=cp.part; }
     buildTicker(); buildBottomBar();
@@ -980,35 +1010,73 @@
     push(t.share_text(url),"warn");
   }
 
-  /* ---- HANG gomb (masodlagos): csak ambient hangot kapcsol, nem lep be ---- */
-  soundBtnSm.addEventListener("click",()=>{
-    initAudio(); soundBtnSm.classList.add("playing"); ping();
-  });
+  /* ---- HANG gomb (masodlagos): csak ambient hangot kapcsol ---- */
+  soundBtnSm.addEventListener("click",()=>{ initAudio(); soundBtnSm.classList.add("playing"); ping(); });
 
-  /* ---- BELEPES (elsodleges): boot-szekvencia -> entitas ---- */
-  let entering=false;
-  function enter(){
+  /* ---- AJTO-VALASZTO: EGY parameterezheto komponens, config-bol renderelve ---- */
+  const DOORS=[
+    {key:"saloon", wings:2, dir:"out", mat:"wood",  dc:"#a06a34", dc2:"#7a4d22", fig:null,    tone:{f:300,type:"sawtooth",dur:.5}, n:{hu:"A KOCSMA",en:"THE SALOON",de:"DER SALOON"}},
+    {key:"palace", wings:2, dir:"in",  mat:"gold",  dc:"#d4ad4e", dc2:"#a9842c", fig:"guard", tone:{f:150,type:"sine",dur:.9},     n:{hu:"A PALOTA",en:"THE PALACE",de:"DER PALAST"}},
+    {key:"house",  wings:1, dir:"in",  mat:"wood",  dc:"#4d7a5a", dc2:"#356048", fig:null,    tone:{f:230,type:"triangle",dur:.5}, n:{hu:"A FAAJTO",en:"THE WOOD DOOR",de:"DIE HOLZTUER"}},
+    {key:"crypt",  wings:1, dir:"in",  mat:"stone", dc:"#6b6472", dc2:"#3e3947", fig:"ghost", tone:{f:90,type:"sine",dur:1.1},     n:{hu:"A KRIPTA",en:"THE CRYPT",de:"DIE GRUFT"}},
+    {key:"gate",   wings:2, dir:"in",  mat:"iron",  dc:"#4a4f5a", dc2:"#2b2f38", fig:null,    tone:{f:520,type:"square",dur:.7},   n:{hu:"A VASKAPU",en:"THE IRON GATE",de:"DAS EISENTOR"}},
+  ];
+  function doorName(key){ const d=DOORS.find(x=>x.key===key); return d?(d.n[lang]||d.n.en):key; }
+  function guardianHTML(fig){
+    if(fig==="guard") return '<span class="guardian guard"><span class="gfig"><span class="g-spear"></span><span class="g-helm"></span><span class="g-body"></span></span></span>';
+    if(fig==="ghost") return '<span class="guardian ghost"><span class="gfig"><span class="gh-shape"><span class="gh-eye l"></span><span class="gh-eye r"></span></span></span></span>';
+    return "";
+  }
+  function renderDoors(){
+    if(!doorsEl) return;
+    doorsEl.innerHTML="";
+    DOORS.forEach(d=>{
+      const b=document.createElement("button");
+      b.className="door mat-"+d.mat; b.type="button";
+      b.setAttribute("data-wings",d.wings); b.setAttribute("data-dir",d.dir); b.setAttribute("data-mag","");
+      b.style.setProperty("--dc",d.dc); b.style.setProperty("--dc2",d.dc2);
+      const leaves = d.wings===2 ? '<span class="dleaf l"></span><span class="dleaf r"></span>' : '<span class="dleaf s"></span>';
+      const knobs  = d.wings===2 ? '<span class="dknob l"></span><span class="dknob r"></span>' : '<span class="dknob"></span>';
+      b.innerHTML='<span class="dstage"><span class="dframe"></span>'+leaves+knobs+'<span class="dglow"></span>'+guardianHTML(d.fig)+'</span><span class="dname">'+esc(d.n[lang]||d.n.en)+'</span>';
+      b.addEventListener("click",()=>chooseDoor(d,b));
+      doorsEl.appendChild(b);
+    });
+    if(doorsHintEl) doorsHintEl.textContent=t.doorsHint;
+    refreshMag();
+  }
+  function relabelDoors(){
+    if(!doorsEl) return;
+    doorsEl.querySelectorAll(".door").forEach((b,i)=>{ const nm=b.querySelector(".dname"); if(nm && DOORS[i]) nm.textContent=DOORS[i].n[lang]||DOORS[i].n.en; });
+    if(doorsHintEl) doorsHintEl.textContent=t.doorsHint;
+  }
+  // egermozgas-parallax az orzokon (silhouette + hatso feny mar CSS-ben)
+  if(doorsEl){
+    doorsEl.addEventListener("mousemove",(e)=>{
+      const r=doorsEl.getBoundingClientRect();
+      doorsEl.style.setProperty("--mx", (((e.clientX-r.left)/r.width-0.5)*2).toFixed(2));
+      doorsEl.style.setProperty("--my", (((e.clientY-r.top)/r.height-0.5)*2).toFixed(2));
+    },{passive:true});
+    doorsEl.addEventListener("mouseleave",()=>{ doorsEl.style.setProperty("--mx","0"); doorsEl.style.setProperty("--my","0"); });
+  }
+
+  /* ---- belepes: fenyres -> ajto-nyilas -> nyikorgas -> feny betolti -> tartalom (~2.2 mp) ---- */
+  let entering=false, chosenDoor=null, prevDoor=null;
+  function chooseDoor(d, btn){
     if(started||entering) return; entering=true;
     initAudio();
-    countHit();
-    visitorMemory();
-    // boot: fekete -> szivveres -> dekodolodo udvozles
-    bootEl.hidden=false;
-    setTimeout(()=>{ if(bootHeart){ bootHeart.classList.add("go"); boom(); } }, reduced?0:300);
-    const revealDelay = reduced?200:1200;
-    setTimeout(()=>{
-      decodeInto(bootText, t.bootGreet, ()=>{});
-    }, revealDelay);
-    const totalDelay = reduced?500:2600;
-    setTimeout(()=>{
-      crtPowerOn();
-      gate.classList.add("gone");
-      setTimeout(()=>{ gate.style.display="none"; }, 500);
-      bootEl.hidden=true;
-      run();
-    }, totalDelay);
+    try{ prevDoor=localStorage.getItem("eber_door"); localStorage.setItem("eber_door", d.key); }catch(e){}
+    chosenDoor=d.key;
+    creak(d.tone);
+    btn.classList.add("opening");
+    const lf=document.createElement("div"); lf.className="doorlight";
+    const r=btn.getBoundingClientRect(); lf.style.left=(r.left+r.width/2)+"px"; lf.style.top=(r.top+r.height/2)+"px";
+    document.body.appendChild(lf); requestAnimationFrame(()=>lf.classList.add("go"));
+    countHit(); visitorMemory();
+    const wait = reduced?600:2200;
+    setTimeout(()=>{ gate.classList.add("gone"); setTimeout(()=>{ gate.style.display="none"; lf.remove(); },600); run(); }, wait);
   }
-  enterBtn.addEventListener("click", enter);
+  function enter(){ if(started||entering) return; const b=doorsEl&&doorsEl.querySelector(".door"); if(b) b.click(); }
+  renderDoors();
   window.addEventListener("keydown",(e)=>{ if(!started && !entering && !gate.classList.contains("gone") && (e.key==="Enter")){ e.preventDefault(); enter(); } });
 
 })();

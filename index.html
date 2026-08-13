@@ -18,7 +18,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=11">
+<link rel="stylesheet" href="styles.css?v=15">
 </head>
 <body>
 <img src="https://visitor-counter.eltewedtem.workers.dev/px?site=ki-vagy" width="1" height="1" alt="" aria-hidden="true" style="position:absolute;left:-9999px;top:0;opacity:0">
@@ -36,13 +36,11 @@
     <h1 class="ent-title" id="ent-title" aria-label="ne nyisd meg">NE NYISD MEG</h1>
     <p class="ent-sub" id="ent-sub">en figyellek.</p>
     <p class="bio-line" id="bio-line" aria-live="polite">&nbsp;</p>
-    <div class="gate-actions">
-      <button id="enter-btn" class="enter-btn" type="button" data-mag>
-        <span class="eb-face">BELEPES</span>
-      </button>
-      <button id="gate-btn" class="sound-btn-sm" type="button" data-mag>
-        <span id="gate-btn-label">&#9654; hang</span>
-      </button>
+    <p class="doors-hint" id="doors-hint">valassz egy ajtot. mind hozzam vezet.</p>
+    <div class="doors" id="doors"></div>
+    <div class="gate-foot">
+      <button id="gate-btn" class="sound-btn-sm" type="button" data-mag><span id="gate-btn-label">&#9654; hang</span></button>
+      <button id="enter-btn" class="enter-hidden" type="button" aria-hidden="true"><span class="eb-face">BELEPES</span></button>
     </div>
     <p class="gate-hint" id="gate-hint">egyedul ajanlott.</p>
   </div>
@@ -95,6 +93,6 @@
   <span id="st-right">--:--:--</span>
 </footer>
 
-<script src="app.js?v=14"></script>
+<script src="app.js?v=15"></script>
 </body>
 </html>

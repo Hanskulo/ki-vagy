@@ -266,3 +266,95 @@ body.crashing #screen, body.crashing #newsbar, body.crashing .gate{
   body.custom-cursor{ cursor:auto; }
   .cursor{ display:none !important; }
 }
+
+/* ============================================================
+   AJTO-VALASZTO -- egy parameterezheto komponens (JS config-bol)
+   Params (inline CSS var / attr): --dc frame, --dc2 leaf, data-wings, data-dir, mat-* class.
+   Csak transform/opacity animal (Lighthouse 90+). Silhouette orzok parallaxszal.
+   ============================================================ */
+.doors-hint{ font-family:var(--mono); color:var(--dim); font-size:clamp(12px,1.7vw,15px); letter-spacing:.04em; margin:.2em 0 .4em; }
+.doors{ display:grid; grid-template-columns:repeat(5,1fr); gap:clamp(8px,1.6vw,18px); width:100%; max-width:820px; margin:0 auto; }
+.door{ background:transparent; border:0; cursor:pointer; padding:0; display:flex; flex-direction:column; align-items:center; gap:.55em;
+  transition:transform .2s ease; }
+.door:hover,.door:focus{ transform:translateY(-6px); outline:none; }
+.dstage{ position:relative; width:100%; aspect-ratio:3/4.4; max-width:150px; perspective:680px;
+  border-radius:4px; background:linear-gradient(#0a0a0f,#050507); overflow:hidden; box-shadow:0 8px 26px rgba(0,0,0,.5); }
+.dframe{ position:absolute; inset:7%; border:4px solid var(--dc); border-radius:4px; }
+.dglow{ position:absolute; left:20%; right:20%; top:14%; bottom:8%;
+  background:radial-gradient(60% 82% at 50% 60%, rgba(255,77,0,.9), rgba(255,77,0,.28) 55%, transparent 76%);
+  opacity:0; transition:opacity .35s ease; }
+.door:hover .dglow,.door:focus .dglow{ opacity:.85; }
+.dleaf{ position:absolute; top:14%; bottom:8%; background:linear-gradient(var(--dc2),#241a10);
+  box-shadow:inset 0 0 0 2px rgba(0,0,0,.35); transform-origin:left center; transition:transform .5s cubic-bezier(.3,.8,.3,1); backface-visibility:hidden; z-index:2; }
+.dleaf.l{ left:20%; right:50%; } .dleaf.r{ left:50%; right:20%; transform-origin:right center; }
+.dleaf.s{ left:20%; right:20%; }
+/* nyilas irany szerint */
+.door[data-dir="in"]:hover .dleaf.l,.door[data-dir="in"]:focus .dleaf.l{ transform:rotateY(58deg); }
+.door[data-dir="in"]:hover .dleaf.r,.door[data-dir="in"]:focus .dleaf.r{ transform:rotateY(-58deg); }
+.door[data-dir="in"]:hover .dleaf.s,.door[data-dir="in"]:focus .dleaf.s{ transform:rotateY(56deg); }
+.door[data-dir="out"]:hover .dleaf.l,.door[data-dir="out"]:focus .dleaf.l{ transform:rotateY(-58deg); }
+.door[data-dir="out"]:hover .dleaf.r,.door[data-dir="out"]:focus .dleaf.r{ transform:rotateY(58deg); }
+.dknob{ position:absolute; width:6px; height:6px; border-radius:50%; background:#e8d9b0; top:50%; z-index:3; }
+.dknob:not(.l):not(.r){ right:26%; } .dknob.l{ left:42%; } .dknob.r{ right:42%; }
+.dname{ font-family:var(--mono); color:var(--dim); font-size:clamp(9px,1.2vw,12px); letter-spacing:.1em; }
+.door:hover .dname,.door:focus .dname{ color:var(--acc); }
+
+/* --- anyagok --- */
+.mat-wood .dframe{ border-radius:4px; }
+.mat-wood .dleaf{ background:linear-gradient(var(--dc2),#241a10); }
+.mat-gold .dframe{ border-width:5px; }
+.mat-gold .dleaf{ background:linear-gradient(var(--dc2),#6b5216); }
+.mat-gold .dstage::before{ content:""; position:absolute; left:50%; top:5%; transform:translateX(-50%); width:24%; height:9%; z-index:4;
+  background:conic-gradient(from -90deg at 50% 100%, transparent 0 22%, var(--dc) 22% 40%, transparent 40% 60%, var(--dc) 60% 78%, transparent 78%); }
+.mat-stone .dframe{ border-radius:50% 50% 3px 3px / 24% 24% 3px 3px; background:repeating-linear-gradient(0deg,transparent 0 12px,rgba(0,0,0,.22) 12px 14px); }
+.mat-stone .dleaf{ background:linear-gradient(#463f4e,#28242f); }
+.mat-stone .dstage::before{ content:""; position:absolute; left:50%; top:24%; transform:translateX(-50%); width:13%; height:24%; z-index:4; opacity:.7;
+  background:linear-gradient(#9a93a6,#5c5566); clip-path:polygon(40% 0,60% 0,60% 34%,100% 34%,100% 52%,60% 52%,60% 100%,40% 100%,40% 52%,0 52%,0 34%,40% 34%); }
+.mat-iron .dframe{ border-radius:44% 44% 3px 3px / 18% 18% 3px 3px; }
+.mat-iron .dleaf{ background:repeating-linear-gradient(90deg,var(--dc) 0 3px,transparent 3px 12px),linear-gradient(#23262e,#15171c); }
+
+/* --- silhouette orzok: parallax reteg + belso legzes/lebeges + hatso feny --- */
+.guardian{ position:absolute; left:50%; bottom:0; z-index:5; width:38%; height:60%;
+  transform:translateX(-50%) translate(calc(var(--mx,0)*7px), calc(var(--my,0)*4px)); transition:transform .12s ease-out; pointer-events:none; }
+.guardian::before{ content:""; position:absolute; left:50%; top:10%; transform:translateX(-50%); width:150%; height:120%;
+  background:radial-gradient(50% 50% at 50% 45%, rgba(255,77,0,.32), transparent 70%); z-index:-1; }
+.gfig{ position:absolute; inset:0; }
+.guard .gfig{ animation:gbreathe 3.6s ease-in-out infinite; }
+.g-body{ position:absolute; bottom:0; left:50%; transform:translateX(-50%); width:64%; height:72%; border-radius:44% 44% 6px 6px; background:#04060b; box-shadow:inset -4px 0 8px rgba(180,200,240,.16); }
+.g-helm{ position:absolute; top:2%; left:50%; transform:translateX(-50%); width:46%; height:30%; border-radius:50% 50% 40% 40%; background:#06080e; box-shadow:inset -3px -1px 0 rgba(190,205,240,.26); }
+.g-spear{ position:absolute; right:2%; bottom:0; width:3px; height:118%; background:linear-gradient(#7a8090,#2a2e36); }
+.g-spear::before{ content:""; position:absolute; top:-7px; left:-3px; border:5px solid transparent; border-bottom-color:#aeb6c6; }
+@keyframes gbreathe{ 0%,100%{transform:translateY(0)} 50%{transform:translateY(-2px)} }
+.ghost .gfig{ animation:ghfloat 4.2s ease-in-out infinite; }
+.gh-shape{ position:absolute; left:50%; bottom:8%; transform:translateX(-50%); width:78%; height:80%;
+  background:radial-gradient(58% 66% at 50% 40%, rgba(220,230,255,.85), rgba(180,200,240,.32) 60%, transparent 76%);
+  border-radius:50% 50% 42% 42%; filter:blur(1px); }
+.gh-shape::after{ content:""; position:absolute; left:14%; right:14%; bottom:-5%; height:22%;
+  background:repeating-linear-gradient(90deg, rgba(210,225,255,.55) 0 18%, transparent 18% 26%); filter:blur(1.4px); }
+.gh-eye{ position:absolute; top:32%; width:12%; height:15%; border-radius:50%; background:rgba(30,20,40,.7); }
+.gh-eye.l{ left:30%; } .gh-eye.r{ right:30%; }
+@keyframes ghfloat{ 0%,100%{transform:translateY(0); opacity:.78} 50%{transform:translateY(-9px); opacity:1} }
+
+/* --- nyito-szekvencia (kattintas) --- */
+.door.opening{ z-index:9; }
+.door.opening .dleaf.l{ transform:rotateY(78deg); } .door.opening .dleaf.r{ transform:rotateY(-78deg); }
+.door.opening .dleaf.s{ transform:rotateY(76deg); }
+.door.opening .dglow{ opacity:1; }
+.doorlight{ position:fixed; left:50%; top:50%; width:40px; height:40px; border-radius:50%; z-index:96; pointer-events:none;
+  transform:translate(-50%,-50%) scale(0); opacity:0;
+  background:radial-gradient(circle, #fff 0%, #ffd8b0 22%, var(--acc) 46%, rgba(255,77,0,.4) 66%, transparent 78%); }
+.doorlight.go{ animation:doorlight 1.5s ease-in forwards; }
+@keyframes doorlight{ 0%{transform:translate(-50%,-50%) scale(0); opacity:0} 30%{opacity:.9} 100%{transform:translate(-50%,-50%) scale(60); opacity:1} }
+
+.gate-foot{ display:flex; align-items:center; justify-content:center; gap:1em; margin-top:.3em; }
+.enter-hidden{ display:none; }
+
+@media (max-width:560px){
+  .doors{ grid-template-columns:repeat(2,1fr); max-width:380px; gap:12px; }
+  .dstage{ max-width:130px; }
+}
+@media (prefers-reduced-motion: reduce){
+  .guard .gfig,.ghost .gfig{ animation:none; }
+  .dleaf{ transition:none; }
+  .doorlight.go{ animation-duration:.4s; }
+}
