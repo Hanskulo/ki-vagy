@@ -587,13 +587,27 @@
     return A;
   }
   function mulberry32(a){ return function(){ a|=0; a=a+0x6D2B79F5|0; let t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
+  // A fiktiv hirfolyam 6 orankent VALODI uj fejleceket kap a proceduralis generatorbol
+  // (nem csak ujrakeveri a fix keszletet), + par rotalt kezzel irt melycikk.
   function rotatedActs(){
-    const A=allActs(); if(!A.length) return A;
     const seed=Math.floor(Date.now()/(6*3600*1000));
-    const rng=mulberry32(seed>>>0);
-    const idx=A.map((_,i)=>i);
-    for(let i=idx.length-1;i>0;i--){ const j=Math.floor(rng()*(i+1)); const t=idx[i]; idx[i]=idx[j]; idx[j]=t; }
-    return idx.map(i=>A[i]);
+    const gen=[];
+    if(window.EBER_GEN){
+      for(let i=0;i<16;i++){ const g=window.EBER_GEN(lang, seed>>>0, i); if(g&&g.h) gen.push({href:`hir.html?g=${seed}&i=${i}&lang=${lang}`, h:g.h}); }
+    }
+    const A=allActs();
+    let curated=[];
+    if(A.length){
+      const r1=mulberry32(seed>>>0);
+      const idx=A.map((_,i)=>i);
+      for(let i=idx.length-1;i>0;i--){ const j=Math.floor(r1()*(i+1)); const t=idx[i]; idx[i]=idx[j]; idx[j]=t; }
+      curated=idx.slice(0,6).map(i=>A[i]);
+    }
+    const all=gen.concat(curated);
+    if(!all.length) return A;
+    const r2=mulberry32((seed^0x1234)>>>0);
+    for(let i=all.length-1;i>0;i--){ const j=Math.floor(r2()*(i+1)); const t=all[i]; all[i]=all[j]; all[j]=t; }
+    return all;
   }
   function actLine(a){
     const p=document.createElement("div"); p.className="line hitem";

@@ -43,9 +43,18 @@
   const bank = DATA.bank || [];
   const gb = DATA.genbody;
   const bi = parseInt(qs.get("b"),10);
-  const isBank = qs.has("b") && bank.length && bi>=0;
+  const gseed = parseInt(qs.get("g"),10);
+  const gi = parseInt(qs.get("i"),10);
+  const isGen = qs.has("g") && Number.isFinite(gseed) && typeof window.EBER_GEN==="function";
+  const isBank = !isGen && qs.has("b") && bank.length && bi>=0;
   let art, bodyParas;
-  if(isBank){
+  if(isGen){
+    const idx = (Number.isFinite(gi)&&gi>=0)?gi:0;
+    const g = window.EBER_GEN(lang, gseed>>>0, idx);
+    art = { cat: (g&&g.cat)||"biz", h: (g&&g.h)||"akta" };
+    bodyParas = window.EBER_GEN_BODY(lang, gseed>>>0, idx);
+    if(!bodyParas || !bodyParas.length) bodyParas = [art.h];
+  } else if(isBank){
     art = bank[Math.min(bi, bank.length-1)];
     bodyParas = [];
     if(gb){
@@ -77,8 +86,15 @@
   // tovabbi aktak -- items + bank kevert, 4 db, az aktualist kizarva
   $("#more-h").textContent = UI.more;
   const more = $("#more");
-  const curHref = isBank ? `hir.html?b=${bi}&lang=${lang}` : `hir.html?id=${id}&lang=${lang}`;
+  const curHref = isGen ? `hir.html?g=${gseed}&i=${gi}&lang=${lang}`
+                : isBank ? `hir.html?b=${bi}&lang=${lang}`
+                : `hir.html?id=${id}&lang=${lang}`;
   const pool = [];
+  // friss generalt aktak az aktualis 6 oras ablakbol
+  if(typeof window.EBER_GEN==="function"){
+    const seed=Math.floor(Date.now()/(6*3600*1000));
+    for(let i=0;i<12;i++){ const g=window.EBER_GEN(lang, seed>>>0, i); if(g&&g.h) pool.push({href:`hir.html?g=${seed}&i=${i}&lang=${lang}`, h:g.h}); }
+  }
   items.forEach((it,i)=>pool.push({href:`hir.html?id=${i+1}&lang=${lang}`, h:it.h}));
   bank.forEach((it,i)=>pool.push({href:`hir.html?b=${i}&lang=${lang}`, h:it.h}));
   const pool2 = pool.filter(p=>p.href!==curHref);

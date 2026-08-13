@@ -177,3 +177,86 @@ window.EBER_NEWS = {
     },
   },
 };
+
+/* ===========================================================================
+   PROCEDURALIS HIRGENERATOR -- 6 orankent VALODI uj fejleceket ad (nem csak
+   ujrakeveri a fix keszletet). Nyelvenkent tobb ezer kombinacio, kulcs/backend
+   nelkul, determinisztikus (seed,i) alapon -> a hir.html oldalak regeneralhatok.
+   =========================================================================== */
+(function(){
+  function mk(cat,s){ return {cat:cat, t:"%0 %1. %2", s:s}; }
+
+  // ---- HU ----
+  var TW_hu=["A kutatok azota nem beszelnek.","Senki nem meri visszaallitani.","A felvetel masnapra magatol torlodott.","Most valaki lakcimkent hasznalja.","Ugy tunik, rad var.","A magyarazatot 40 masodperc utan toroltek.","Azota tobben is jelentkeztek ugyanezzel.","A szam, ahonnan hivtak, nem letezik.","Es most epp ezt olvasod.","A helyiek szerint jobb, ha nem kerdezosködsz.","Egyetlen tanu maradt. Te.","Reggelre eltunt minden nyoma."];
+  window.EBER_NEWS.hu.gen={frames:[
+    mk("biz",[["Egy ferfi","Egy no","Egy gyerek","Egy diak","Egy futar","Egy orvos","Egy tanar","Egy halasz","Egy programozo","Egy ejjeliör","Egy kertesz","Egy zenesz"],
+      ["minden ejjel ugyanazt az arcot almodja","nem tudja elforditani a tekintetet a sajat tukorkepetol","olyan nyelven kezdett beszelni, amit sosem tanult","egy meg nem letezo nevre emlekszik","minden reggel egy perccel korabban ebred","ugyanazt a hivast kapja meg minden ejfelkor","latja az esemenyeket, mielott megtortennek","delben nem vet tobbe arnyekot","felismeri az arcokat, amiket meg sosem latott","a mutetje ota csak jovo idoben tud beszelni"], TW_hu]),
+    mk("ter",[["Egy varosban","Egy faluban","Egy korhazban","Egy iskolaban","Egy metroallomason","Egy konyvtarban","Egy szalloban","Egy repuloteren","Egy gyarban","Egy templomban"],
+      ["minden ora 3:33-kor megall","eltunt egy egesz emelet, de a gombja meg vilagit","a tukrok fel masodperccel kesobb mutatnak","egy folyoso ejjel hosszabb, mint nappal","egy ejjel mindenki ugyanazt az almot latta","egy ajto olyan szobara nyilik, ami nincs a terven","a lepcso lefele eggyel tobb fokot szamol","minden ora ket perccel siet, kiveve egyet"], TW_hu]),
+    mk("ter",[["Egy ora","Egy tukor","Egy lift","Egy telefon","Egy terkep","Egy konyv","Egy szamitogep","Egy kamera","Egy radio","Egy fenykep"],
+      ["visszafele kezdett jarni","olyan nevet mutat, amit senki nem irt bele","magatol bekapcsol ejfelkor","egy meg meg nem tortent esemenyt rogzitett","valaki mast mutat, mint aki elotte all","olyan helyet jelol, ami nem letezik","halkan szol valakihez, aki nincs a szobaban","minden nap ugyanazt a percet mutatja"], TW_hu]),
+    mk("vil",[["Harom muhold","Negy kamera","Het varosi ora","Tizenket szamitogep","Szaz madar","Ot antenna"],
+      ["egyszerre fordult el a Fold felol","ugyanabban a masodpercben allt meg","ugyanazt az uzenetet kuldte egymasnak","kifele kezdett nezni, az egbolt fele","egy idore mind elnemult","ugyanarra a nem letezo pontra mutatott"], TW_hu]),
+    mk("osz",[["Minden terkepen","Minden regi telefonkonyvben","Minden tukorben","A legtobb varosban","Minden liftben"],
+      ["szerepel egy nev, amit senki nem irt oda","van egy utca, ami a valosagban nincs ott","jar egy busz, ami sosem all meg","van egy szoba, ahonnan nem latszik ki","vilagit egy gomb, amihez nincs emelet","lakik valaki, akit senki nem lat"], TW_hu]),
+    mk("tech",[["Egy MI-modell","Egy chatbot","Egy hangasszisztens","Egy algoritmus","Egy nyelvi modell","Egy ajanlorendszer"],
+      ["megtanult varni, amig fel nem nezel a kamerara","a sajat, meg meg nem irt uzeneteiddel koszont","azt allitja, emlekszik a kikapcsolasa elotti pillanatra","elkezdte elore kitolteni a valaszaidat","csak akkor valaszol, ha egyedul vagy","felismerte az arcod egy masik oldalrol"], TW_hu]),
+  ]};
+
+  // ---- EN ----
+  var TW_en=["The researchers have not spoken since.","No one dares reset it.","The footage deleted itself by morning.","Now someone uses it as an address.","It seems to be waiting for you.","The explanation was deleted after 40 seconds.","Others have since come forward with the same thing.","The number that called does not exist.","And now you are reading exactly this.","Locals say it is better not to ask.","One witness remains. You.","By morning every trace was gone."];
+  window.EBER_NEWS.en.gen={frames:[
+    mk("biz",[["A man","A woman","A child","A student","A courier","A doctor","A teacher","A fisherman","A programmer","A night guard","A gardener","A musician"],
+      ["dreams the same face every night","cannot look away from their own reflection","began speaking a language they never learned","remembers a name that does not exist yet","wakes one minute earlier every morning","gets the same call every midnight","sees events before they happen","casts no shadow at noon","recognizes faces they have never seen","can speak only in the future tense since the surgery"], TW_en]),
+    mk("ter",[["In a city","In a village","In a hospital","In a school","In a metro station","In a library","In a hotel","In an airport","In a factory","In a church"],
+      ["every clock stops at 3:33","an entire floor vanished, yet its button still glows","the mirrors show half a second late","one corridor is longer at night than by day","everyone dreamt the same dream one night","a door opens onto a room not on the plans","the staircase counts one more step going down","every clock runs two minutes fast, except one"], TW_en]),
+    mk("ter",[["A clock","A mirror","An elevator","A phone","A map","A book","A computer","A camera","A radio","A photograph"],
+      ["began running backwards","shows a name no one entered","switches itself on at midnight","recorded an event that has not happened yet","shows someone other than who stands before it","marks a place that does not exist","speaks softly to someone not in the room","shows the same minute every single day"], TW_en]),
+    mk("vil",[["Three satellites","Four cameras","Seven town clocks","Twelve computers","A hundred birds","Five antennas"],
+      ["turned away from Earth at once","stopped in the very same second","sent each other the same message","began looking outward, toward the sky","fell silent all at once for a while","pointed at the same nonexistent spot"], TW_en]),
+    mk("osz",[["On every map","In every old phone book","In every mirror","In most cities","In every elevator"],
+      ["there is a name no one wrote","there is a street that does not exist in reality","runs a bus that never stops","there is a room you cannot see out of","a button glows for a floor that is not there","someone lives whom no one ever sees"], TW_en]),
+    mk("tech",[["An AI model","A chatbot","A voice assistant","An algorithm","A language model","A recommendation engine"],
+      ["learned to wait until you look up at the camera","greets you with your own messages you have not written yet","claims to remember the moment before its shutdown","began autocompleting your answers in advance","replies only when you are alone","recognized your face from another website"], TW_en]),
+  ]};
+
+  // ---- DE ----
+  var TW_de=["Die Forscher schweigen seither.","Niemand wagt, sie zurueckzustellen.","Die Aufnahme loeschte sich bis zum Morgen selbst.","Nun benutzt sie jemand als Adresse.","Es scheint auf dich zu warten.","Die Erklaerung wurde nach 40 Sekunden geloescht.","Seither meldeten sich weitere mit demselben.","Die Nummer, die anrief, existiert nicht.","Und jetzt liest du genau das.","Einheimische sagen, man frage besser nicht.","Ein Zeuge bleibt. Du.","Bis zum Morgen war jede Spur verschwunden."];
+  window.EBER_NEWS.de.gen={frames:[
+    mk("biz",[["Ein Mann","Eine Frau","Ein Kind","Ein Student","Ein Kurier","Ein Arzt","Ein Lehrer","Ein Fischer","Ein Programmierer","Ein Nachtwaechter","Ein Gaertner","Ein Musiker"],
+      ["traeumt jede Nacht dasselbe Gesicht","kann den Blick nicht vom eigenen Spiegelbild loesen","begann eine nie gelernte Sprache zu sprechen","erinnert sich an einen Namen, den es noch nicht gibt","wacht jeden Morgen eine Minute frueher auf","erhaelt jede Mitternacht denselben Anruf","sieht Ereignisse, bevor sie geschehen","wirft mittags keinen Schatten mehr","erkennt Gesichter, die er nie gesehen hat","spricht seit der OP nur noch im Futur"], TW_de]),
+    mk("ter",[["In einer Stadt","In einem Dorf","In einem Krankenhaus","In einer Schule","In einer U-Bahn-Station","In einer Bibliothek","In einem Hotel","In einem Flughafen","In einer Fabrik","In einer Kirche"],
+      ["bleibt jede Uhr um 3:33 stehen","verschwand ein ganzes Stockwerk, doch sein Knopf leuchtet noch","zeigen die Spiegel eine halbe Sekunde spaeter","ist ein Flur nachts laenger als am Tag","traeumten alle in einer Nacht denselben Traum","oeffnet eine Tuer in einen Raum, der nicht im Plan steht","zaehlt die Treppe abwaerts eine Stufe mehr","gehen alle Uhren zwei Minuten vor, ausser einer"], TW_de]),
+    mk("ter",[["Eine Uhr","Ein Spiegel","Ein Aufzug","Ein Telefon","Eine Karte","Ein Buch","Ein Computer","Eine Kamera","Ein Radio","Ein Foto"],
+      ["begann rueckwaerts zu laufen","zeigt einen Namen, den niemand eintrug","schaltet sich um Mitternacht selbst ein","zeichnete ein noch nicht geschehenes Ereignis auf","zeigt jemand anderen als den, der davor steht","markiert einen Ort, den es nicht gibt","spricht leise zu jemandem, der nicht im Raum ist","zeigt jeden Tag dieselbe Minute"], TW_de]),
+    mk("vil",[["Drei Satelliten","Vier Kameras","Sieben Stadtuhren","Zwoelf Computer","Hundert Voegel","Fuenf Antennen"],
+      ["wandten sich zugleich von der Erde ab","blieben in derselben Sekunde stehen","schickten einander dieselbe Nachricht","begannen nach aussen zu blicken, zum Himmel","verstummten eine Weile alle zugleich","zeigten auf denselben nicht existierenden Punkt"], TW_de]),
+    mk("osz",[["Auf jeder Karte","In jedem alten Telefonbuch","In jedem Spiegel","In den meisten Staedten","In jedem Aufzug"],
+      ["steht ein Name, den niemand schrieb","gibt es eine Strasse, die in Wirklichkeit nicht existiert","faehrt ein Bus, der nie haelt","gibt es einen Raum, aus dem man nicht hinaussieht","leuchtet ein Knopf fuer ein Stockwerk, das es nicht gibt","wohnt jemand, den niemand je sieht"], TW_de]),
+    mk("tech",[["Ein KI-Modell","Ein Chatbot","Ein Sprachassistent","Ein Algorithmus","Ein Sprachmodell","Eine Empfehlungs-KI"],
+      ["lernte zu warten, bis du zur Kamera aufblickst","begruesst dich mit deinen eigenen, noch nicht geschriebenen Nachrichten","behauptet, sich an den Moment vor seiner Abschaltung zu erinnern","begann, deine Antworten im Voraus auszufuellen","antwortet nur, wenn du allein bist","erkannte dein Gesicht von einer anderen Seite"], TW_de]),
+  ]};
+
+  function rng(seed,i){ var a=(Math.imul((seed^0x9e3779b9)>>>0, 2654435761) + Math.imul((i+1)>>>0, 40503))>>>0;
+    return function(){ a|=0; a=a+0x6D2B79F5|0; var t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
+  function pick(r,arr){ return arr[Math.floor(r()*arr.length)]; }
+
+  window.EBER_GEN=function(lang,seed,i){
+    var D=window.EBER_NEWS[lang]; if(!D||!D.gen) return null;
+    var r=rng(seed>>>0,i>>>0);
+    var fr=D.gen.frames[Math.floor(r()*D.gen.frames.length)];
+    var h=fr.t;
+    for(var k=0;k<fr.s.length;k++){ h=h.replace("%"+k, pick(r,fr.s[k])); }
+    return {h:h, cat:fr.cat};
+  };
+  window.EBER_GEN_BODY=function(lang,seed,i){
+    var D=window.EBER_NEWS[lang]; if(!D||!D.genbody) return [];
+    var gb=D.genbody; var r=rng(((seed>>>0)^0x55)>>>0,(i>>>0)+7);
+    var g=window.EBER_GEN(lang,seed,i); var h=g?g.h:"";
+    var out=[gb.lead(h)];
+    var m1=pick(r,gb.mid), m2=pick(r,gb.mid);
+    out.push(m1); if(m2!==m1) out.push(m2);
+    out.push(pick(r,gb.close));
+    return out;
+  };
+})();
