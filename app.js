@@ -578,61 +578,78 @@
     openPrompt();
   }
 
-  function nd(){ return (window.EBER_NEWS && window.EBER_NEWS[lang]) ? window.EBER_NEWS[lang] : null; }
-  function allActs(){
-    const d=nd(); if(!d) return [];
-    const A=[];
-    (d.items||[]).forEach((it,i)=>A.push({href:`hir.html?id=${i+1}&lang=${lang}`, h:it.h}));
-    (d.bank||[]).forEach((it,i)=>A.push({href:`hir.html?b=${i}&lang=${lang}`, h:it.h}));
-    return A;
-  }
-  function mulberry32(a){ return function(){ a|=0; a=a+0x6D2B79F5|0; let t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
-  // A fiktiv hirfolyam 6 orankent VALODI uj fejleceket kap a proceduralis generatorbol
-  // (nem csak ujrakeveri a fix keszletet), + par rotalt kezzel irt melycikk.
-  function rotatedActs(){
-    const seed=Math.floor(Date.now()/(6*3600*1000));
-    const gen=[];
-    if(window.EBER_GEN){
-      for(let i=0;i<16;i++){ const g=window.EBER_GEN(lang, seed>>>0, i); if(g&&g.h) gen.push({href:`hir.html?g=${seed}&i=${i}&lang=${lang}`, h:g.h}); }
+  /* ---- felso szalag: VALOS vilaghirek (Wikipedia "In the news", kulcs nelkul, CORS) ----
+     Forras: en.wikipedia.org/api/rest_v1/feed/featured -> news (ITN) + mostread.
+     A valasztott nyelvre gepi forditva (angolnal eredeti), 1 oras cache. */
+  const TICK={hu:"// VILAG",en:"// WORLD",de:"// WELT"};
+  const ITN_CACHE="eber_itn_raw", ITN_TTL=60*60*1000, ITN_MAX=18;
+  let itnRaw=[];
+  function itnDateParts(off){ const d=new Date(Date.now()-off*86400000); return `${d.getUTCFullYear()}/${String(d.getUTCMonth()+1).padStart(2,"0")}/${String(d.getUTCDate()).padStart(2,"0")}`; }
+  async function fetchTopNews(){
+    try{ const raw=localStorage.getItem(ITN_CACHE); if(raw){ const c=JSON.parse(raw); if(c&&c.t&&Array.isArray(c.items)&&c.items.length&&(Date.now()-c.t)<ITN_TTL){ itnRaw=c.items.slice(0,ITN_MAX); buildTopBar(); return; } } }catch(e){}
+    for(let off=0; off<2; off++){
+      try{
+        const ctrl=new AbortController(); const to=setTimeout(()=>ctrl.abort(),8000);
+        const r=await fetch(`https://en.wikipedia.org/api/rest_v1/feed/featured/${itnDateParts(off)}`,{signal:ctrl.signal, headers:{"Api-User-Agent":"ki-vagy (github.com/Hanskulo/ki-vagy)"}});
+        clearTimeout(to);
+        if(!r.ok) continue;
+        const j=await r.json();
+        const items=[];
+        (Array.isArray(j.news)?j.news:[]).forEach(n=>{
+          const title=String(n.story||"").replace(/<[^>]+>/g," ").replace(/\s+/g," ").trim();
+          let url="https://en.wikipedia.org/wiki/Portal:Current_events";
+          const lk=(n.links||[]).find(x=>x&&x.content_urls&&x.content_urls.desktop&&x.content_urls.desktop.page);
+          if(lk) url=lk.content_urls.desktop.page;
+          if(title) items.push({title, url});
+        });
+        if(j.mostread && Array.isArray(j.mostread.articles)){
+          j.mostread.articles.forEach(a=>{ if(items.length<ITN_MAX && a && a.content_urls && a.content_urls.desktop){ const ti=(a.titles&&(a.titles.normalized||a.titles.canonical))||a.title||""; if(ti) items.push({title:String(ti).replace(/_/g," "), url:a.content_urls.desktop.page}); } });
+        }
+        if(items.length){ itnRaw=items.slice(0,ITN_MAX); try{ localStorage.setItem(ITN_CACHE, JSON.stringify({t:Date.now(), items:itnRaw})); }catch(e){} break; }
+      }catch(e){}
     }
-    const A=allActs();
-    let curated=[];
-    if(A.length){
-      const r1=mulberry32(seed>>>0);
-      const idx=A.map((_,i)=>i);
-      for(let i=idx.length-1;i>0;i--){ const j=Math.floor(r1()*(i+1)); const t=idx[i]; idx[i]=idx[j]; idx[j]=t; }
-      curated=idx.slice(0,6).map(i=>A[i]);
-    }
-    const all=gen.concat(curated);
-    if(!all.length) return A;
-    const r2=mulberry32((seed^0x1234)>>>0);
-    for(let i=all.length-1;i>0;i--){ const j=Math.floor(r2()*(i+1)); const t=all[i]; all[i]=all[j]; all[j]=t; }
-    return all;
+    buildTopBar();
   }
-  function actLine(a){
-    const p=document.createElement("div"); p.className="line hitem";
-    const el=document.createElement("a"); el.className="hlink"; el.href=a.href; el.target="_blank"; el.rel="noopener"; el.textContent=a.h;
-    p.appendChild(el); out.appendChild(p);
+  let itnBuilding=false;
+  async function buildTopBar(){
+    if(!itnRaw.length){ renderTop([]); return; }
+    if(lang==="en"){ renderTop(itnRaw); return; }
+    const ck="eber_itn_"+lang;
+    try{ const c=JSON.parse(localStorage.getItem(ck)); if(c&&c.t&&Array.isArray(c.items)&&c.items.length&&(Date.now()-c.t)<ITN_TTL){ renderTop(c.items); return; } }catch(e){}
+    renderTop(itnRaw);
+    if(itnBuilding) return; itnBuilding=true; const reqLang=lang;
+    const tr=await translateList(itnRaw, reqLang); itnBuilding=false;
+    try{ localStorage.setItem("eber_itn_"+reqLang, JSON.stringify({t:Date.now(), items:tr})); }catch(e){}
+    if(reqLang===lang) renderTop(tr);
   }
-  function pushNews(n){ rotatedActs().slice(0, n||4).forEach(actLine); scroll(); }
-
-  const TICK={hu:"// HALO",en:"// NET",de:"// NETZ"};
-  function buildTicker(){
+  let topShown=[];
+  function renderTop(items){
+    topShown=items||[];
     const track=$("#ticker-track"); const label=$("#ticker-label");
-    const acts=rotatedActs(); if(!track||!acts.length) return;
-    if(label) label.textContent=TICK[lang]||"// NET";
+    if(label) label.textContent=TICK[lang]||"// WORLD";
+    if(!track) return;
     track.innerHTML="";
-    const list=acts.slice(0,14);
-    const fill=()=> list.forEach(a=>{
-      const b=document.createElement("button"); b.className="ti"; b.type="button"; b.textContent=a.h;
-      b.addEventListener("click",()=>{ window.open(a.href,"_blank","noopener"); });
+    if(!topShown.length) return;
+    const fill=()=> topShown.slice(0,ITN_MAX).forEach(m=>{
+      const b=document.createElement("button"); b.className="ti"; b.type="button"; b.textContent=m.title;
+      b.addEventListener("click",()=>{ window.open(m.url,"_blank","noopener"); });
       track.appendChild(b);
     });
     fill(); fill();
   }
+  function buildTicker(){ buildTopBar(); }
+  function pushNews(n){
+    const items=(topShown&&topShown.length)?topShown:itnRaw;
+    items.slice(0, n||6).forEach(m=>{
+      const p=document.createElement("div"); p.className="line hitem";
+      const a=document.createElement("a"); a.className="hlink"; a.href=m.url; a.target="_blank"; a.rel="noopener noreferrer"; a.textContent=m.title;
+      p.appendChild(a); out.appendChild(p);
+    });
+    scroll();
+  }
 
   /* ---- also hirszalag: valos Hacker News, a HALO-n at ---- */
-  const NB={hu:"HALO",en:"NET",de:"NETZ"};
+  const NB={hu:"HACKER NEWS",en:"HACKER NEWS",de:"HACKER NEWS"};
   let hnRaw=[];
   const NEWS_CACHE="eber_hn_raw", NEWS_TTL=6*3600*1000, NEWS_MAX=20;
   async function fetchRealNews(){
@@ -878,7 +895,7 @@
   if(gateBtnLabel) gateBtnLabel.innerHTML=esc(t.soundLabel);
   applyMenuLabels();
   buildBio();
-  buildTicker(); buildBottomBar(); fetchRealNews();
+  buildBottomBar(); fetchRealNews(); fetchTopNews();
   refreshMag(); initCursor(); startFluid();
   document.querySelectorAll(".ls").forEach(b=>{
     b.classList.toggle("active", b.dataset.lang===lang);
