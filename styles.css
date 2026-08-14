@@ -473,18 +473,29 @@ body.crashing #screen, body.crashing #newsbar, body.crashing .gate{
 @keyframes ghfloat{ 0%,100%{transform:translateY(0); opacity:.7} 50%{transform:translateY(-12px); opacity:1} }
 
 /* SETALO OR az ajtok elott (>=3 ajto elott elhalad, oda-vissza) */
-.patrol{ position:absolute; left:0; right:0; bottom:12px; height:60px; z-index:6; pointer-events:none; }
-.pfig{ position:absolute; bottom:0; left:3%; width:22px; height:56px; animation:patrol 14s ease-in-out infinite alternate; }
-@keyframes patrol{ from{ left:2% } to{ left:90% } }
-.pfig .pb{ position:absolute; bottom:15px; left:50%; transform:translateX(-50%); width:72%; height:56%; border-radius:44% 44% 5px 5px; background:#04060b; box-shadow:inset -3px 0 6px rgba(170,190,230,.16); }
-.pfig .ph{ position:absolute; top:2px; left:50%; transform:translateX(-50%); width:54%; height:26%; border-radius:50% 50% 40% 40%; background:#06080e; box-shadow:inset -2px -1px 0 rgba(190,205,240,.24); }
-.pfig .psp{ position:absolute; right:6%; top:-6px; bottom:2px; width:2.5px; background:linear-gradient(#7a8090,#2a2e36); }
-.pfig .pl{ position:absolute; bottom:0; width:5px; height:17px; border-radius:3px; background:#04060b; transform-origin:top center; }
-.pfig .pl.l{ left:32%; animation:legw .5s ease-in-out infinite; }
-.pfig .pl.r{ left:54%; animation:legw .5s ease-in-out infinite reverse; }
-@keyframes legw{ 0%,100%{transform:rotate(22deg)} 50%{transform:rotate(-22deg)} }
+.patrol{ position:absolute; left:0; right:0; bottom:26px; height:0; z-index:6; pointer-events:none; }
+.pfig{ position:absolute; bottom:0; left:1%; width:82px; height:200px; animation:patrol 16s ease-in-out infinite alternate; }
+@keyframes patrol{ from{ left:1% } to{ left:calc(100% - 92px) } }
+.pfig .pb{ position:absolute; bottom:22%; left:50%; transform:translateX(-50%); width:60%; height:56%; border-radius:44% 44% 10% 10%; background:#04060b; box-shadow:inset -6px 0 12px rgba(170,190,230,.18); }
+.pfig .ph{ position:absolute; top:0; left:50%; transform:translateX(-50%); width:42%; height:20%; border-radius:50% 50% 40% 40%; background:#06080e; box-shadow:inset -4px -2px 0 rgba(190,205,240,.28); }
+.pfig .psp{ position:absolute; right:8%; top:-6%; bottom:2%; width:5px; background:linear-gradient(#7a8090,#2a2e36); border-radius:2px; }
+.pfig .psp::before{ content:""; position:absolute; top:-11px; left:-4px; border:7px solid transparent; border-bottom-color:#aeb6c6; }
+.pfig .pl{ position:absolute; bottom:0; width:11%; height:24%; border-radius:8px; background:#04060b; transform-origin:top center; }
+.pfig .pl.l{ left:34%; animation:legw .5s ease-in-out infinite; }
+.pfig .pl.r{ left:52%; animation:legw .5s ease-in-out infinite reverse; }
+@keyframes legw{ 0%,100%{transform:rotate(20deg)} 50%{transform:rotate(-20deg)} }
+@media (max-width:560px){ .pfig{ width:64px; height:158px; } }
 
 @media (prefers-reduced-motion: reduce){
   .door[data-open="swing"] .dleaf,.mat-curtain .dleaf,.door[data-open="rise"] .dleaf,.mat-gold .dframe,.ghost .gfig,.pfig,.pfig .pl{ animation:none !important; }
   .patrol{ display:none; }
+}
+
+/* ---- mobil allo optimalizalas: ferjen el minden ajto + a setalo OR ---- */
+@media (max-width:560px){
+  .gate{ align-items:flex-start; overflow-y:auto; padding:5vh 5vw 8vh; }
+  .gate-wrap{ gap:1.8vh; }
+  .ent-title{ font-size:12.5vw; }
+  .doors{ gap:14px; }
+  .patrol{ bottom:20px; }
 }
