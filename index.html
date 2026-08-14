@@ -18,7 +18,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=15">
+<link rel="stylesheet" href="styles.css?v=16">
 </head>
 <body>
 <img src="https://visitor-counter.eltewedtem.workers.dev/px?site=ki-vagy" width="1" height="1" alt="" aria-hidden="true" style="position:absolute;left:-9999px;top:0;opacity:0">
@@ -28,6 +28,15 @@
 <div id="vignette" class="vignette" aria-hidden="true"></div>
 <div id="cursor" class="cursor" aria-hidden="true"><span class="cur-dot"></span><span class="cur-ring"></span></div>
 <div id="crash" class="crash" aria-hidden="true"></div>
+
+<!-- FILMSZERU INTRO (videofajl: holdfényes erdo, entitas uldoz egy embert) -->
+<div id="intro" class="intro">
+  <video id="intro-vid" class="intro-vid" muted autoplay playsinline preload="auto" poster="intro-poster.jpg">
+    <source src="intro.webm" type="video/webm">
+    <source src="intro.mp4" type="video/mp4">
+  </video>
+  <button id="intro-skip" class="intro-skip" type="button">atlepes &#9654;</button>
+</div>
 
 <!-- BIOMETRIKUS ATJARO -->
 <div id="gate" class="gate">
@@ -93,6 +102,6 @@
   <span id="st-right">--:--:--</span>
 </footer>
 
-<script src="app.js?v=15"></script>
+<script src="app.js?v=16"></script>
 </body>
 </html>

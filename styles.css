@@ -358,3 +358,15 @@ body.crashing #screen, body.crashing #newsbar, body.crashing .gate{
   .dleaf{ transition:none; }
   .doorlight.go{ animation-duration:.4s; }
 }
+
+/* ============================================================
+   FILMSZERU INTRO (videofajl az ajtok ele)
+   ============================================================ */
+.intro{ position:fixed; inset:0; z-index:92; background:#04060c; display:flex; align-items:center; justify-content:center;
+  transition:opacity .6s ease; }
+.intro.gone{ opacity:0; pointer-events:none; }
+.intro-vid{ width:100%; height:100%; object-fit:cover; }
+.intro-skip{ position:absolute; top:16px; right:18px; z-index:2; font-family:var(--mono); font-size:12px; letter-spacing:.14em;
+  color:var(--dim); background:transparent; border:1px solid var(--acc-line); padding:.5em 1em; border-radius:2px; cursor:pointer; text-transform:uppercase; }
+.intro-skip:hover,.intro-skip:focus{ color:var(--ink); border-color:var(--acc); outline:none; }
+@media (prefers-reduced-motion: reduce){ .intro-vid{ display:none; } }

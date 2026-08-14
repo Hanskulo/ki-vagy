@@ -1077,6 +1077,13 @@
   }
   function enter(){ if(started||entering) return; const b=doorsEl&&doorsEl.querySelector(".door"); if(b) b.click(); }
   renderDoors();
+
+  /* ---- intro video: lejatszik -> ajtok; skippelheto; reduced-motion -> azonnal, 6s biztonsagi ---- */
+  const introEl=$("#intro"), introVid=$("#intro-vid"), introSkip=$("#intro-skip");
+  function endIntro(){ if(!introEl||introEl.classList.contains("gone")) return; introEl.classList.add("gone"); setTimeout(()=>{ introEl.style.display="none"; try{ introVid&&introVid.pause(); }catch(e){} }, 650); }
+  if(introVid) introVid.addEventListener("ended", endIntro);
+  if(introSkip) introSkip.addEventListener("click", endIntro);
+  if(reduced) endIntro(); else setTimeout(endIntro, 6000);
   window.addEventListener("keydown",(e)=>{ if(!started && !entering && !gate.classList.contains("gone") && (e.key==="Enter")){ e.preventDefault(); enter(); } });
 
 })();
