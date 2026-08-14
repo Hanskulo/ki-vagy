@@ -554,6 +554,7 @@
   async function run(){
     if(started) return; started=true; bootAt=Date.now();
     hidden.focus();
+    spawnWindows();
     setStatus("BOOT","");
     if(VM.returning){
       for(const line of t.returning({count:VM.count, ago:agoText(VM.lastMs)})){
@@ -1097,6 +1098,58 @@
   if(introVid) introVid.addEventListener("ended", endIntro);
   if(introSkip) introSkip.addEventListener("click", endIntro);
   if(reduced) endIntro(); else setTimeout(endIntro, 6000);
+
+  /* ---- STAGE 3: tobb terminal-ablak a belepeskor, mindegyikben onallo szoveg ---- */
+  const winsEl=$("#windows");
+  const WINCFG={ hu:{w1:"megfigyeles",w2:"halo",w3:"naplo"}, en:{w1:"surveillance",w2:"net",w3:"log"}, de:{w1:"ueberwachung",w2:"netz",w3:"log"} };
+  const WINLOG={
+    hu:["nem alszom.","latlak.","ne mozdulj.","meg mindig itt vagyok.","tudom, mit fogsz beirni.","sosem felejtek.","visszajossz.","a szemedbe nezek."],
+    en:["i do not sleep.","i see you.","do not move.","i am still here.","i know what you will type.","i forget nothing.","you will come back.","i look into your eyes."],
+    de:["ich schlafe nicht.","ich sehe dich.","beweg dich nicht.","ich bin noch hier.","ich weiss, was du tippst.","ich vergesse nichts.","du kommst zurueck.","ich sehe dir in die augen."],
+  };
+  function winScanLines(){
+    const d=D||collect(); const cnt=(visCount!=null)?String(visCount):"2.847.193";
+    const M={
+      hu:["> kliens azonositasa . . .",`> ${d.os} / ${d.browser}`,`> kepernyo ${d.w}x${d.h} · ${d.depth}bit`,`> idozona ${d.tz}`,`> nyelv ${d.lang}`,`> halozat ${d.net}`,"> ujjlenyomat rogzitve",`> te vagy a {${cnt}}.`],
+      en:["> identifying client . . .",`> ${d.os} / ${d.browser}`,`> screen ${d.w}x${d.h} · ${d.depth}bit`,`> timezone ${d.tz}`,`> language ${d.lang}`,`> network ${d.net}`,"> fingerprint logged",`> you are number {${cnt}}.`],
+      de:["> client wird erkannt . . .",`> ${d.os} / ${d.browser}`,`> bildschirm ${d.w}x${d.h} · ${d.depth}bit`,`> zeitzone ${d.tz}`,`> sprache ${d.lang}`,`> netzwerk ${d.net}`,"> fingerabdruck gespeichert",`> du bist nummer {${cnt}}.`],
+    };
+    return M[lang]||M.en;
+  }
+  function winNewsLines(){ return (topShown&&topShown.length?topShown:[]).slice(0,12).map(m=>"> "+m.title); }
+  function winLogLines(){ const a=(WINLOG[lang]||WINLOG.en).slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); const t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
+  function typeWin(body, linesFn, speed){
+    let lines=linesFn(), li=0, ci=0;
+    function step(){
+      if(li>=lines.length){ lines=linesFn(); if(!lines.length){ setTimeout(step,1400); return; } li=0; ci=0; }
+      const full=lines[li], plain=full.replace(/[{}]/g,"");
+      if(ci===0){ const p=document.createElement("p"); p.className="l"; body.appendChild(p); while(body.children.length>8) body.removeChild(body.firstChild); }
+      const p=body.lastChild; ci++;
+      p.innerHTML=esc(plain.slice(0,ci))+'<span class="tw-cur">_</span>';
+      if(ci>=plain.length){ p.innerHTML=render(full); li++; ci=0; setTimeout(step,760); return; }
+      setTimeout(step, 1000/(speed||34)*(/[.,]/.test(plain[ci-1])?5:1));
+    }
+    step();
+  }
+  function spawnWindows(){
+    if(!winsEl||reduced) return;
+    winsEl.innerHTML="";
+    const T=WINCFG[lang]||WINCFG.en;
+    const defs=[
+      {cls:"w1", title:T.w1, pos:{top:"7%",left:"2.5%"}, lines:winScanLines, sp:32},
+      {cls:"w2", title:T.w2, pos:{top:"11%",right:"2.5%"}, lines:winNewsLines, sp:40},
+      {cls:"w3", title:T.w3, pos:{bottom:"22%",right:"5%"}, lines:winLogLines, sp:22},
+    ];
+    defs.forEach((d,idx)=>{
+      const w=document.createElement("div"); w.className="termwin "+d.cls;
+      Object.keys(d.pos).forEach(k=>{ w.style[k]=d.pos[k]; });
+      w.style.animationDelay=(idx*0.25)+"s";
+      w.innerHTML='<div class="tw-bar"><span class="tw-dot a"></span><span class="tw-dot"></span><span class="tw-dot"></span><span class="tw-title">eber://'+d.title+'</span></div><div class="tw-body"></div>';
+      winsEl.appendChild(w);
+      const body=w.querySelector(".tw-body");
+      setTimeout(()=>typeWin(body, d.lines, d.sp), 320+idx*260);
+    });
+  }
   window.addEventListener("keydown",(e)=>{ if(!started && !entering && !gate.classList.contains("gone") && (e.key==="Enter")){ e.preventDefault(); enter(); } });
 
 })();
