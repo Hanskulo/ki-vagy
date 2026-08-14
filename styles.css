@@ -370,3 +370,55 @@ body.crashing #screen, body.crashing #newsbar, body.crashing .gate{
   color:var(--dim); background:transparent; border:1px solid var(--acc-line); padding:.5em 1em; border-radius:2px; cursor:pointer; text-transform:uppercase; }
 .intro-skip:hover,.intro-skip:focus{ color:var(--ink); border-color:var(--acc); outline:none; }
 @media (prefers-reduced-motion: reduce){ .intro-vid{ display:none; } }
+
+/* ============================================================
+   STAGE 2: ajtonkent MAS nyilas + MAS jelenet mogotte
+   ============================================================ */
+/* --- ajtonkent kulonbozo nyilas (data-open) --- */
+.door[data-open="swing"].opening .dleaf.l{ transform:rotateY(-84deg); } .door[data-open="swing"].opening .dleaf.r{ transform:rotateY(84deg); }
+.door[data-open="guard"].opening .dleaf.l{ transform:rotateY(70deg); } .door[data-open="guard"].opening .dleaf.r{ transform:rotateY(-70deg); }
+.door[data-open="guard"].opening .guardian{ transform:translateX(-195%) translateY(2px); opacity:.9; transition:transform .8s ease, opacity .8s ease; }
+.door[data-open="part"].opening .dleaf.l{ transform:translateX(-96%) skewX(-4deg); } .door[data-open="part"].opening .dleaf.r{ transform:translateX(96%) skewX(4deg); }
+.door[data-open="creak"] .dleaf.s{ transition-duration:1.1s; } .door[data-open="creak"].opening .dleaf.s{ transform:rotateY(82deg); }
+.door[data-open="creak"].opening .ghost .gfig{ animation:ghdrift 1.6s ease-out forwards; }
+.door[data-open="rise"] .dleaf{ transform-origin:top center; transition:transform .55s cubic-bezier(.4,.1,.2,1); }
+.door[data-open="rise"].opening .dleaf.l,.door[data-open="rise"].opening .dleaf.r{ transform:translateY(-106%); }
+@keyframes ghdrift{ 0%{transform:translateY(0); opacity:1} 100%{transform:translateY(-150%) scale(1.15); opacity:0} }
+
+/* --- FUGGONY anyag (keretben lengedezo) --- */
+.mat-curtain .dframe{ border-radius:3px; border-color:var(--dc); }
+.mat-curtain .dstage::before{ content:""; position:absolute; left:9%; right:9%; top:8%; height:5%; background:#3a2a12; border-radius:3px; z-index:3; }
+.mat-curtain .dleaf{ top:13%; bottom:6%; border-radius:0 0 40% 40% / 0 0 9% 9%; transform-origin:top center;
+  background:repeating-linear-gradient(90deg, var(--dc2) 0 5px, #5a2029 5px 10px, #3f171d 10px 12px);
+  box-shadow:inset 0 -14px 18px -10px rgba(0,0,0,.5); animation:sway 3.4s ease-in-out infinite; }
+.mat-curtain .dleaf.r{ animation-delay:-1.7s; }
+.mat-curtain .dknob{ display:none; }
+@keyframes sway{ 0%,100%{ transform:rotate(0.7deg) } 50%{ transform:rotate(-0.7deg) } }
+.door[data-open="part"]:hover .dleaf.l,.door[data-open="part"]:focus .dleaf.l{ transform:translateX(-34%) skewX(-3deg); }
+.door[data-open="part"]:hover .dleaf.r,.door[data-open="part"]:focus .dleaf.r{ transform:translateX(34%) skewX(3deg); }
+
+/* --- jelenet a nyilaskor (doorlight szinvariansok, "mindig mas amit latunk") --- */
+.doorlight.reveal-tavern{ background:radial-gradient(circle, #fff2d0 0%, #ffcf80 24%, #c8781e 48%, rgba(200,120,30,.35) 68%, transparent 80%); }
+.doorlight.reveal-gold{ background:radial-gradient(circle, #fff6da 0%, #ffe08a 26%, #caa14a 50%, rgba(200,160,70,.35) 70%, transparent 82%); }
+.doorlight.reveal-cold{ background:radial-gradient(circle, #eaf4ff 0%, #bcd8ff 24%, #3a6ea5 50%, rgba(40,80,140,.35) 70%, transparent 82%); }
+.doorlight.reveal-wind{ background:radial-gradient(circle, #ffe6ea 0%, #d98a97 26%, #7a2f3a 50%, rgba(120,45,58,.35) 70%, transparent 82%); }
+.doorlight.reveal-dark{ background:radial-gradient(circle, #241019 0%, #120a10 30%, #060305 58%, #000 78%); }
+
+/* --- berepulo DENEVEREK (kripta -> sotetseg) --- */
+.bat{ position:absolute; left:47%; bottom:42%; width:16px; height:9px; z-index:8; pointer-events:none;
+  background:#0a0a0f;
+  clip-path:polygon(50% 42%, 0 2%, 18% 56%, 34% 36%, 50% 72%, 66% 36%, 82% 56%, 100% 2%);
+  animation:batfly 1.5s ease-out forwards; }
+@keyframes batfly{
+  0%{ transform:translate(0,0) scale(.35) rotate(0deg); opacity:0 }
+  14%{ opacity:1 }
+  100%{ transform:translate(calc(var(--i,0) * 48px), -160px) scale(1) rotate(calc(var(--i,0) * 10deg)); opacity:0 }
+}
+.bat::after{ content:""; position:absolute; inset:0; background:#0a0a0f; clip-path:inherit; transform-origin:center; animation:batflap .12s steps(2) infinite alternate; }
+@keyframes batflap{ from{transform:scaleY(1)} to{transform:scaleY(.45)} }
+
+@media (prefers-reduced-motion: reduce){
+  .mat-curtain .dleaf{ animation:none; }
+  .bat{ display:none; }
+  .door[data-open="creak"].opening .ghost .gfig{ animation:none; }
+}

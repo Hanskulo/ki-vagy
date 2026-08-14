@@ -1014,12 +1014,14 @@
   soundBtnSm.addEventListener("click",()=>{ initAudio(); soundBtnSm.classList.add("playing"); ping(); });
 
   /* ---- AJTO-VALASZTO: EGY parameterezheto komponens, config-bol renderelve ---- */
+  // Minden ajto MASKEPP nyilik (open), es MAS jelenet van mogotte (reveal). Egyik a streamhubra visz (target).
+  const STREAMHUB="https://hanskulo.github.io/streamhub/";
   const DOORS=[
-    {key:"saloon", wings:2, dir:"out", mat:"wood",  dc:"#a06a34", dc2:"#7a4d22", fig:null,    tone:{f:300,type:"sawtooth",dur:.5}, n:{hu:"A KOCSMA",en:"THE SALOON",de:"DER SALOON"}},
-    {key:"palace", wings:2, dir:"in",  mat:"gold",  dc:"#d4ad4e", dc2:"#a9842c", fig:"guard", tone:{f:150,type:"sine",dur:.9},     n:{hu:"A PALOTA",en:"THE PALACE",de:"DER PALAST"}},
-    {key:"house",  wings:1, dir:"in",  mat:"wood",  dc:"#4d7a5a", dc2:"#356048", fig:null,    tone:{f:230,type:"triangle",dur:.5}, n:{hu:"A FAAJTO",en:"THE WOOD DOOR",de:"DIE HOLZTUER"}},
-    {key:"crypt",  wings:1, dir:"in",  mat:"stone", dc:"#6b6472", dc2:"#3e3947", fig:"ghost", tone:{f:90,type:"sine",dur:1.1},     n:{hu:"A KRIPTA",en:"THE CRYPT",de:"DIE GRUFT"}},
-    {key:"gate",   wings:2, dir:"in",  mat:"iron",  dc:"#4a4f5a", dc2:"#2b2f38", fig:null,    tone:{f:520,type:"square",dur:.7},   n:{hu:"A VASKAPU",en:"THE IRON GATE",de:"DAS EISENTOR"}},
+    {key:"saloon",  wings:2, dir:"out", mat:"wood",    open:"swing", reveal:"tavern", target:STREAMHUB, dc:"#a06a34", dc2:"#7a4d22", fig:null,    tone:{f:300,type:"sawtooth",dur:.5}, n:{hu:"A KOCSMA",en:"THE SALOON",de:"DER SALOON"}},
+    {key:"palace",  wings:2, dir:"in",  mat:"gold",    open:"guard", reveal:"gold",   target:null,      dc:"#d4ad4e", dc2:"#a9842c", fig:"guard", tone:{f:150,type:"sine",dur:.9},     n:{hu:"A PALOTA",en:"THE PALACE",de:"DER PALAST"}},
+    {key:"curtain", wings:2, dir:"in",  mat:"curtain", open:"part",  reveal:"wind",   target:null,      dc:"#7a2f3a", dc2:"#7e2f39", fig:null,    tone:{f:210,type:"sine",dur:.6},     n:{hu:"A FUGGONY",en:"THE CURTAIN",de:"DER VORHANG"}},
+    {key:"crypt",   wings:1, dir:"in",  mat:"stone",   open:"creak", reveal:"dark",   target:null,      dc:"#6b6472", dc2:"#3e3947", fig:"ghost", tone:{f:90,type:"sine",dur:1.1},     n:{hu:"A KRIPTA",en:"THE CRYPT",de:"DIE GRUFT"}},
+    {key:"gate",    wings:2, dir:"in",  mat:"iron",    open:"rise",  reveal:"cold",   target:null,      dc:"#4a4f5a", dc2:"#2b2f38", fig:null,    tone:{f:520,type:"square",dur:.7},   n:{hu:"A VASKAPU",en:"THE IRON GATE",de:"DAS EISENTOR"}},
   ];
   function doorName(key){ const d=DOORS.find(x=>x.key===key); return d?(d.n[lang]||d.n.en):key; }
   function guardianHTML(fig){
@@ -1033,7 +1035,7 @@
     DOORS.forEach(d=>{
       const b=document.createElement("button");
       b.className="door mat-"+d.mat; b.type="button";
-      b.setAttribute("data-wings",d.wings); b.setAttribute("data-dir",d.dir); b.setAttribute("data-mag","");
+      b.setAttribute("data-wings",d.wings); b.setAttribute("data-dir",d.dir); b.setAttribute("data-open",d.open); b.setAttribute("data-reveal",d.reveal); b.setAttribute("data-mag","");
       b.style.setProperty("--dc",d.dc); b.style.setProperty("--dc2",d.dc2);
       const leaves = d.wings===2 ? '<span class="dleaf l"></span><span class="dleaf r"></span>' : '<span class="dleaf s"></span>';
       const knobs  = d.wings===2 ? '<span class="dknob l"></span><span class="dknob r"></span>' : '<span class="dknob"></span>';
@@ -1061,6 +1063,11 @@
 
   /* ---- belepes: fenyres -> ajto-nyilas -> nyikorgas -> feny betolti -> tartalom (~2.2 mp) ---- */
   let entering=false, chosenDoor=null, prevDoor=null;
+  function spawnBats(stage,n){
+    for(let i=0;i<n;i++){ const bat=document.createElement("span"); bat.className="bat";
+      bat.style.setProperty("--i", (i-((n-1)/2)).toFixed(2)); bat.style.animationDelay=(Math.random()*0.35).toFixed(2)+"s";
+      stage.appendChild(bat); setTimeout(()=>bat.remove(),1800); }
+  }
   function chooseDoor(d, btn){
     if(started||entering) return; entering=true;
     initAudio();
@@ -1068,12 +1075,18 @@
     chosenDoor=d.key;
     creak(d.tone);
     btn.classList.add("opening");
-    const lf=document.createElement("div"); lf.className="doorlight";
+    const stage=btn.querySelector(".dstage");
+    // ajtonkent mas jelenet a nyilaskor: kripta -> sotetseg + berepulo denevErek + szellem drift
+    if(d.reveal==="dark" && stage && !reduced){ spawnBats(stage,7); if(!muted) setTimeout(()=>noiseHit(0.25,0.05,2600),200); }
+    const lf=document.createElement("div"); lf.className="doorlight reveal-"+d.reveal;
     const r=btn.getBoundingClientRect(); lf.style.left=(r.left+r.width/2)+"px"; lf.style.top=(r.top+r.height/2)+"px";
     document.body.appendChild(lf); requestAnimationFrame(()=>lf.classList.add("go"));
     countHit(); visitorMemory();
     const wait = reduced?600:2200;
-    setTimeout(()=>{ gate.classList.add("gone"); setTimeout(()=>{ gate.style.display="none"; lf.remove(); },600); run(); }, wait);
+    setTimeout(()=>{
+      if(d.target){ try{ window.location.assign(d.target); return; }catch(e){} }
+      gate.classList.add("gone"); setTimeout(()=>{ gate.style.display="none"; lf.remove(); },600); run();
+    }, wait);
   }
   function enter(){ if(started||entering) return; const b=doorsEl&&doorsEl.querySelector(".door"); if(b) b.click(); }
   renderDoors();
