@@ -442,3 +442,49 @@ body.crashing #screen, body.crashing #newsbar, body.crashing .gate{
 .tw-cur{ color:var(--acc); }
 @media (max-width:640px){ .termwin.w2,.termwin.w3{ display:none; } .termwin.w1{ width:74vw; left:50%!important; right:auto!important; transform:translateX(-50%); top:6%!important; } }
 @media (prefers-reduced-motion: reduce){ .termwin{ animation:none; opacity:1; transform:none; } }
+
+/* ============================================================
+   STAGE 2b: idle animaciok (nyitas elott is elnek) + setalo OR
+   ============================================================ */
+#doors{ position:relative; }
+/* hover/nyitas alatt az idle-animacio ne akadalyozza a transform-ot */
+.door:hover .dleaf, .door:focus .dleaf, .door.opening .dleaf{ animation:none !important; }
+
+/* kocsma (ketszarnyu): idle lengedeses, mint amin bementel */
+.door[data-open="swing"] .dleaf{ animation:swingidle 3.4s ease-in-out infinite; }
+.door[data-open="swing"] .dleaf.r{ animation-delay:-1.7s; }
+@keyframes swingidle{ 0%,100%{transform:rotateY(0deg)} 30%{transform:rotateY(-11deg)} 70%{transform:rotateY(10deg)} }
+
+/* fuggony: szello */
+.mat-curtain .dleaf{ animation:breeze 3.2s ease-in-out infinite; }
+.mat-curtain .dleaf.r{ animation-delay:-1.6s; }
+@keyframes breeze{ 0%,100%{ transform:rotate(0.5deg) translateX(0) skewX(0deg) } 33%{ transform:rotate(-1.5deg) translateX(-3px) skewX(2.2deg) } 66%{ transform:rotate(1.1deg) translateX(2px) skewX(-1.6deg) } }
+
+/* vaskapu: halk rezges */
+.door[data-open="rise"] .dleaf{ animation:ironidle 4.5s ease-in-out infinite; }
+@keyframes ironidle{ 0%,100%{transform:translateY(0)} 50%{transform:translateY(-1.5px)} }
+
+/* palota: arany fakly-derenges */
+.mat-gold .dframe{ animation:goldflick 2.8s ease-in-out infinite; }
+@keyframes goldflick{ 0%,100%{opacity:1} 45%{opacity:.82} 62%{opacity:.96} }
+
+/* szellem: jol lathato lebeges */
+.ghost .gfig{ animation:ghfloat 3.6s ease-in-out infinite; }
+@keyframes ghfloat{ 0%,100%{transform:translateY(0); opacity:.7} 50%{transform:translateY(-12px); opacity:1} }
+
+/* SETALO OR az ajtok elott (>=3 ajto elott elhalad, oda-vissza) */
+.patrol{ position:absolute; left:0; right:0; bottom:12px; height:60px; z-index:6; pointer-events:none; }
+.pfig{ position:absolute; bottom:0; left:3%; width:22px; height:56px; animation:patrol 14s ease-in-out infinite alternate; }
+@keyframes patrol{ from{ left:2% } to{ left:90% } }
+.pfig .pb{ position:absolute; bottom:15px; left:50%; transform:translateX(-50%); width:72%; height:56%; border-radius:44% 44% 5px 5px; background:#04060b; box-shadow:inset -3px 0 6px rgba(170,190,230,.16); }
+.pfig .ph{ position:absolute; top:2px; left:50%; transform:translateX(-50%); width:54%; height:26%; border-radius:50% 50% 40% 40%; background:#06080e; box-shadow:inset -2px -1px 0 rgba(190,205,240,.24); }
+.pfig .psp{ position:absolute; right:6%; top:-6px; bottom:2px; width:2.5px; background:linear-gradient(#7a8090,#2a2e36); }
+.pfig .pl{ position:absolute; bottom:0; width:5px; height:17px; border-radius:3px; background:#04060b; transform-origin:top center; }
+.pfig .pl.l{ left:32%; animation:legw .5s ease-in-out infinite; }
+.pfig .pl.r{ left:54%; animation:legw .5s ease-in-out infinite reverse; }
+@keyframes legw{ 0%,100%{transform:rotate(22deg)} 50%{transform:rotate(-22deg)} }
+
+@media (prefers-reduced-motion: reduce){
+  .door[data-open="swing"] .dleaf,.mat-curtain .dleaf,.door[data-open="rise"] .dleaf,.mat-gold .dframe,.ghost .gfig,.pfig,.pfig .pl{ animation:none !important; }
+  .patrol{ display:none; }
+}

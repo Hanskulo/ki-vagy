@@ -1044,6 +1044,10 @@
       b.addEventListener("click",()=>chooseDoor(d,b));
       doorsEl.appendChild(b);
     });
+    // setalo OR az ajtok elott (>=3 ajto elott elhalad)
+    if(!reduced){ const pat=document.createElement("div"); pat.className="patrol";
+      pat.innerHTML='<span class="pfig"><span class="psp"></span><span class="ph"></span><span class="pb"></span><span class="pl l"></span><span class="pl r"></span></span>';
+      doorsEl.appendChild(pat); }
     if(doorsHintEl) doorsHintEl.textContent=t.doorsHint;
     refreshMag();
   }
